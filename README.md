@@ -2,29 +2,34 @@
 
 # AcquaLux Backend API
 
-Backend REST API per il sistema di prenotazione imbarcazioni di lusso AcquaLux, sviluppato come project work universitario.
+Backend REST API per il sistema di prenotazione imbarcazioni di lusso AcquaLux, sviluppato come project work
+universitario.
 
 </div>
 
 <details>
 <summary><strong>📚 Contesto Accademico</strong></summary>
 
-|  |  |
-|---|---|
-| **Università** | Università Telematica Pegaso |
-| **Corso di Studio** | Informatica per le Aziende Digitali (L-31) |
-| **Settori Scientifico-Disciplinari** | • Informatica (INF/01)<br>• Ingegneria Economico-Gestionale (ING-IND/35) |
-| **Tema** | 1 - La digitalizzazione dell'impresa |
-| **Traccia** | 1.4 - Sviluppo di una pagina web per un servizio di prenotazione online di un'impresa del settore terziario |
-| **CFU** | 3 |
+|                                      |                                                                                                             |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| **Università**                       | Università Telematica Pegaso                                                                                |
+| **Corso di Studio**                  | Informatica per le Aziende Digitali (L-31)                                                                  |
+| **Settori Scientifico-Disciplinari** | • Informatica (INF/01)<br>• Ingegneria Economico-Gestionale (ING-IND/35)                                    |
+| **Tema**                             | 1 - La digitalizzazione dell'impresa                                                                        |
+| **Traccia**                          | 1.4 - Sviluppo di una pagina web per un servizio di prenotazione online di un'impresa del settore terziario |
+| **CFU**                              | 3                                                                                                           |
 
 </details>
 
 ## 📝 Descrizione del Progetto
 
-AcquaLux rappresenta l'implementazione di un sistema di prenotazione online per imbarcazioni di lusso, rispondendo alle esigenze delle imprese del settore terziario di disporre di sistemi efficienti per la gestione della clientela. Questo repository contiene la componente backend del sistema, sviluppata seguendo le specifiche del project work che richiedeva l'utilizzo di Python per la creazione di API che gestiscano le logiche di prenotazione.
+AcquaLux rappresenta l'implementazione di un sistema di prenotazione online per imbarcazioni di lusso, rispondendo alle
+esigenze delle imprese del settore terziario di disporre di sistemi efficienti per la gestione della clientela. Questo
+repository contiene la componente backend del sistema, sviluppata seguendo le specifiche del project work che richiedeva
+l'utilizzo di Python per la creazione di API che gestiscano le logiche di prenotazione.
 
-Il sistema è stato progettato per essere intuitivo e di facile utilizzo, implementando le migliori pratiche di sviluppo software e garantendo un'esperienza utente ottimale attraverso API REST ben strutturate.
+Il sistema è stato progettato per essere intuitivo e di facile utilizzo, implementando le migliori pratiche di sviluppo
+software e garantendo un'esperienza utente ottimale attraverso API REST ben strutturate.
 
 ## 🛠️ Tecnologie Principali
 
@@ -41,18 +46,19 @@ Il sistema è stato progettato per essere intuitivo e di facile utilizzo, implem
 
 <div align="center">
 
-| Funzionalità | Descrizione |
-|---|---|
-| 🔐 **Autenticazione** | Sistema di autenticazione e autorizzazione utenti |
-| 📅 **Prenotazioni** | Gestione completa del ciclo di vita delle prenotazioni |
-| 🚤 **Catalogo** | Gestione del catalogo delle imbarcazioni disponibili |
-| 📚 **Documentazione** | API documentate attraverso OpenAPI/Swagger |
+| Funzionalità          | Descrizione                                            |
+|-----------------------|--------------------------------------------------------|
+| 🔐 **Autenticazione** | Sistema di autenticazione e autorizzazione utenti      |
+| 📅 **Prenotazioni**   | Gestione completa del ciclo di vita delle prenotazioni |
+| 🚤 **Catalogo**       | Gestione del catalogo delle imbarcazioni disponibili   |
+| 📚 **Documentazione** | API documentate attraverso OpenAPI/Swagger             |
 
 </div>
 
 ## 📖 Documentazione API
 
-La documentazione completa delle API è accessibile attraverso l'interfaccia Swagger UI, disponibile all'indirizzo `/docs` dopo l'avvio del server.
+La documentazione completa delle API è accessibile attraverso l'interfaccia Swagger UI, disponibile all'indirizzo
+`/docs` dopo l'avvio del server.
 
 ## 👨‍💻 Sviluppato da
 
@@ -74,3 +80,23 @@ Corso di Laurea in Informatica per le Aziende Digitali
 Questo progetto è distribuito con licenza MIT. Vedere il file `LICENSE` per maggiori dettagli.
 
 </div>
+
+## ⚙️ Configurazione
+
+È necessario definire le variabili d'ambiente per il corretto funzionamento del backend. Si consiglia di creare un file
+`environment.sh` o comunque assicurarsi che le seguenti variabili siano disponibili nel contesto di esecuzione:
+
+```shell
+export DB_HOST=<hostname>
+export DB_NAME=<database_name>
+export DB_PASSWORD=<password>
+export DB_PORT=<port_number>
+export DB_USER=<username>
+export ENVIRONMENT_NAME=<environment_name>
+```
+
+Dopo aver configurato il file, eseguire il seguente comando per caricarne il contenuto:
+
+```bash
+source config/environment.sh
+```
