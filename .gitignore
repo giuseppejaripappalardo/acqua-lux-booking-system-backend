@@ -1,0 +1,17 @@
+# Escludi le directory __cache__ e altri file standard relativi a Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Escludi i file di log e i file temporanei
+*.log
+*.tmp
+*.swp
+*~
+
+
+# Escludi il file environment.sh nella directory config
+# Contiene potenzialmente credenziali di accesso a db
+# ed è sempre buona pratica evitare che queste informazioni
+# vengano riportate sul repository ;)
+config/environment.sh
