@@ -2,31 +2,25 @@ import os
 
 from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import sessionmaker
-from models import Base
-from utils.logger import Logger
+
+from database.entities import Base
+from utils.logger_service import LoggerService
 
 
 class Database:
-
     engine = None
     session_local = None
-    env = os.getenv("ENVIRONMENT_NAME", "dev")
     _instance = None
-    _logger = Logger().logger
+    _logger = LoggerService().logger
     _initialized = False
 
-    """
-    Evitiamo di ricreare l'istanza del database più volte.
-    Se già questa classe è stata istanziata ritorniamo la stessa
-    istanza. Qui sfruttiamo volutamente il pattern singleton.
-    """
     def __new__(cls):
-        cls._logger.info("Creating Database instance")
+        """
+            Uso il pattern singleton per assicurarmi di avere una sola istanza
+            del database.
+        """
         if cls._instance is None:
-            cls._logger.info("Istanza è None quindi la creo")
             cls._instance = super().__new__(cls)
-        else:
-            cls._logger.info("l'istanza esiste già, la ritorno ;)")
         return cls._instance
 
     def __init__(self):
@@ -35,10 +29,10 @@ class Database:
             return
 
         """
-        Qui sto creando la stringa di connessione da passare
-        per la connessione al database
+            Genero la stringa di connessione al db leggendo le variabili
+            d'ambiente appositamente previste.
         """
-        DATABASE_URL = URL.create(
+        database_url = URL.create(
             "mysql+mysqlconnector",
             username=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
@@ -48,16 +42,15 @@ class Database:
         )
 
         """
-            A questo punto utilizziamo la stringa di connessione al db
-            per creare l'engine e la sessione'
+            In questo step usiamo la stringa di connessione al db per creare engine
         """
-        self.engine = create_engine(DATABASE_URL)
+        self.engine = create_engine(database_url)
         self.session_local = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-
-        if self.env == "dev":
-            Base.metadata.create_all(bind=self.engine)
-
         self._initialized = True
+
+        if os.getenv('ENVIRONMENT_NAME') == 'dev':
+            self._logger.info("Ambiente dev, procediamo con la creazione dello schema del db.")
+            self.create_tables()
 
     def get_db(self):
         db = self.session_local()
@@ -65,3 +58,12 @@ class Database:
             yield db
         finally:
             db.close()
+
+    def create_tables(self):
+        """
+            Usato solo per scopi di sviluppo per la creazione dello schema del db.
+            Fuori dall'ambiente di Dev possiamo sfruttare alembic, visto che ho
+            previsto la possibilità di gestire le migrations in questo modo.
+            (Vedi alembic versions)
+        """
+        Base.metadata.create_all(bind=self.engine)

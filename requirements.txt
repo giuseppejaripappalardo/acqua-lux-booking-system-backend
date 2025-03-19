@@ -1,26 +1,28 @@
+alembic==1.15.1
 annotated-types==0.7.0
 anyio==4.8.0
 bcrypt==4.2.1
-cffi @ file:///croot/cffi_1736182485317/work
+cffi==1.17.1
 click==8.1.8
-colorama @ file:///work/perseverance-python-buildout/croot/colorama_1698847155966/work
+colorama==0.4.6
 fastapi==0.115.8
-greenlet @ file:///croot/greenlet_1733860072744/work
-h11 @ file:///croot/h11_1706652277403/work
+greenlet==3.1.1
+h11==0.14.0
 idna==3.10
+loguru==0.7.3
 Mako==1.3.8
-MarkupSafe @ file:///croot/markupsafe_1738584038848/work
+MarkupSafe==2.1.3
 mysql-connector-python==9.2.0
-protobuf==6.30.0rc1
+protobuf==6.30.1
 pycparser==2.22
-pydantic==2.11.0a2
-pydantic_core==2.29.0
+pydantic==2.10.6
+pydantic_core==2.27.2
 python-dotenv==1.0.1
 setuptools==75.8.0
-six @ file:///tmp/build/80754af9/six_1644875935023/work
+six==1.16.0
 sniffio==1.3.1
-SQLAlchemy @ file:///croot/sqlalchemy_1736565039440/work
+SQLAlchemy==2.0.39
 starlette==0.45.3
-typing_extensions @ file:///croot/typing_extensions_1734714854207/work
+typing_extensions==4.12.2
 uvicorn==0.34.0
-wheel==0.45.1
+wheel==0.40.0

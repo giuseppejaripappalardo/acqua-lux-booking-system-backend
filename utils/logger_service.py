@@ -4,7 +4,7 @@ from pathlib import Path
 from loguru import logger
 
 
-class Logger:
+class LoggerService:
 
     logger = None
     _instance = None
@@ -23,8 +23,16 @@ class Logger:
         logs_dir = Path("logs")
         logs_dir.mkdir(exist_ok=True)
 
+        """
+            Sto facendo l'unpack perchè as_posix restituisce una tupla e non una stringa
+            In questo caso usando la sintassi di unpacking otteniamo la stringa del path in
+            cui il logs dovranno essere salvati
+        """
+        (log_file_path,) = Path(logs_dir, "app.log").as_posix(),
+        print(f"Log file path: {log_file_path}")
+
         logger.add(
-            "logs/app.log",
+            log_file_path,
             rotation="10 MB",
             level="DEBUG",
             format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",

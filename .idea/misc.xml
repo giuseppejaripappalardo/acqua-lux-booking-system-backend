@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="acqua-lux-booking-system" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="acqua-lux-booking-system" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="acqualux" project-jdk-type="Python SDK" />
 </project>
