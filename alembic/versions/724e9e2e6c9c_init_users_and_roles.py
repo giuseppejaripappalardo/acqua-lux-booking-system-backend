@@ -1,8 +1,8 @@
-"""users and roles table init
+"""init users and roles
 
-Revision ID: fa0cebd8e174
+Revision ID: 724e9e2e6c9c
 Revises: 
-Create Date: 2025-03-20 18:23:48.643501
+Create Date: 2025-03-20 20:34:57.950167
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'fa0cebd8e174'
+revision: str = '724e9e2e6c9c'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,8 +24,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('description', sa.String(length=255), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
-    sa.Column('modified_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default='2025-03-20 19:34:56.198599', nullable=False),
+    sa.Column('modified_at', sa.DateTime(), server_default='2025-03-20 19:34:56.198624', nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -37,8 +37,8 @@ def upgrade() -> None:
     sa.Column('firstname', sa.String(length=255), nullable=False),
     sa.Column('lastname', sa.String(length=255), nullable=False),
     sa.Column('role_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
-    sa.Column('modified_at', sa.DateTime(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default='2025-03-20 19:34:56.195916', nullable=False),
+    sa.Column('modified_at', sa.DateTime(), server_default='2025-03-20 19:34:56.196118', nullable=False),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

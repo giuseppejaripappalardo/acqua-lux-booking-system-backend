@@ -1,15 +1,15 @@
 from datetime import datetime
 import pytz
-from sqlalchemy import text, TextClause
+from sqlalchemy import text
 
 
 class DateTimeProvider:
     @staticmethod
-    def get_timestamp_utc_sql() -> TextClause:
+    def get_timestamp_utc_sql() -> str:
         """
             Metodo di utilità per l'inserimento di date con SQL Alchemy.
         """
-        return text("CURRENT_TIMESTAMP")
+        return datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S.%f")
 
     @staticmethod
     def parse_to_timezone(utc_timestamp: datetime) -> datetime:
