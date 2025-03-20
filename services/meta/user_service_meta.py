@@ -1,10 +1,20 @@
 from abc import abstractmethod, ABC
 
-from models.user import UserCreate, UserOut
+from request.user.user_request import UserRequest
+from response.user.user_response import UserResponse
 
 
 class UserServiceMeta(ABC):
+    """
+    Questa classe astratta funziona come base per l'implementazione di UserService.
+    Di fatto definiamo qui i metodi che il service dovrà implementare.
+    Tecnicamente fa ciò che farebbe un'interfaccia.
+    """
 
     @abstractmethod
-    def create_user(self, user: UserCreate) -> UserOut:
+    def create_user(self, user: UserRequest) -> UserResponse:
+        pass
+
+    @abstractmethod
+    def find_all(self) -> list[UserResponse]:
         pass

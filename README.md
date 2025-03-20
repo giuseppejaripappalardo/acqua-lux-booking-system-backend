@@ -95,7 +95,7 @@ export DB_USER=<username>
 export ENVIRONMENT_NAME=<environment_name>
 ```
 
-Dopo aver configurato il file, eseguire il seguente comando per caricarne il contenuto:
+Dopo aver inserito le informazioni all'interno del file, eseguire il comando:
 
 ```bash
 source config/environment.sh

@@ -1,3 +1,5 @@
+from typing import List, Type
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
@@ -13,9 +15,11 @@ class UserRepository(UserRepositoryMeta):
     def __init__(self, db: Session = Depends(Database().get_db)):
         self._db = db
 
-    def create(self, user: User):
-        print(user)
+    def create(self, user: User) -> User:
         self._db.add(user)
         self._db.commit()
         self._db.refresh(user)
         return user
+
+    def find_all(self) -> list[Type[User]]:
+        return self._db.query(User).all()

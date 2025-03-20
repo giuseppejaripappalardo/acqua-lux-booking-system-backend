@@ -1,14 +1,13 @@
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 
 class BaseController:
     """
     Controller base che fornisce metodi di interfaccia standard per le risposte.
-    Questo sarà esteso da altri controller ed utilizzato nelle route.
     """
 
-    @staticmethod
-    def send_success(data=None, message="Richiesta completata con successo", status_code=200):
+    def send_success(self, data=None, message="Request completed successfully", status_code=200):
         """
         Restituisce una risposta di successo standard.
 
@@ -22,12 +21,11 @@ class BaseController:
             content={
                 "success": True,
                 "message": message,
-                "data": data,
+                "data": jsonable_encoder(data),
             },
         )
 
-    @staticmethod
-    def send_error(message="Si è verificato un errore", status_code=400, errors=None):
+    def send_error(self, message="An error has occurred", status_code=400, errors=None):
         """
         Restituisce una risposta di errore standard.
 

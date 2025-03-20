@@ -1,15 +1,14 @@
 from typing import List
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
 from config.database import Database
-from database.entities.user import User
-from models.user import UserOut
+from controllers.user_controller import UserController
+from response.user.user_response import UserResponse
 
 router = APIRouter(prefix="/user", tags=["user"])
 db = Database()
 
-@router.get("/", response_model=List[UserOut])
-def users_list(db_session: Session = Depends(db.get_db)):
-    return db_session.query(User).all()
+@router.get("/", response_model=List[UserResponse])
+def users_list(user_controller: UserController = Depends(UserController)):
+    return user_controller.find_all()

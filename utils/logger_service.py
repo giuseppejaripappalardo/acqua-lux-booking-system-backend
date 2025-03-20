@@ -6,6 +6,10 @@ from loguru import logger
 
 class LoggerService:
 
+    """
+        Semplice classe di utility per gestire il logging all'interno del project work.
+    """
+
     logger = None
     _instance = None
     _initialized = False
@@ -29,7 +33,6 @@ class LoggerService:
             cui il logs dovranno essere salvati
         """
         (log_file_path,) = Path(logs_dir, "app.log").as_posix(),
-        print(f"Log file path: {log_file_path}")
 
         logger.add(
             log_file_path,
