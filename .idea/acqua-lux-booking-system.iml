@@ -12,6 +12,9 @@
       <sourceFolder url="file://$MODULE_DIR$/services" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/utils" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/controllers" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/decorators" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/exceptions" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="acqualux" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

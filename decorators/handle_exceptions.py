@@ -27,7 +27,7 @@ def handle_exceptions(func):
             return self.send_error(e.message)
         except ValidationError as e:
             _log_error(self, func.__name__, e, "ValidationError")
-            return self.send_error(str(e.message), status_code=422)
+            return self.send_error(str(e), status_code=422)
         except Exception as e:
             _log_error(self, func.__name__, e, "Exception")
             return self.send_error(Messages.GENERIC_ERROR.value)

@@ -1,18 +1,18 @@
 from typing import Type
 
-import bcrypt
 from fastapi import Depends
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
+from bcrypt_hash_password import PassowrdHasher
+from database.entities import User
 from database.repositories.impl.user_repository import UserRepository
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
-from database.entities import User
 from exceptions.generic.GenericDatabaseException import GenericDatabaseException
 from exceptions.generic.IntegrityDatabaseException import IntegrityDatabaseException
 from logger_service import LoggerService
 from messages import Messages
-from response.user.user_response import UserResponse
 from request.user.user_request import UserRequest
+from response.user.user_response import UserResponse
 from services.meta.user_service_meta import UserServiceMeta
 
 
@@ -30,7 +30,7 @@ class UserService(UserServiceMeta):
             Metodo preposto del service per la creazione degli utenti.
         """
         try:
-            hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            hashed_password = PassowrdHasher().bcrypt_hash_password(user.password)
             new_user = User(
                 username=user.username,
                 password=hashed_password,

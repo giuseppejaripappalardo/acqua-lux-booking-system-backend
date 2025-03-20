@@ -1,18 +1,16 @@
+from datetime import datetime
+from typing import Optional
+
 from pydantic import ConfigDict, BaseModel
 
-from response.role.role_response import RoleResponse
-
-
-class UserResponse(BaseModel):
+class RoleResponse(BaseModel):
     """
         Ho creato un DTO specifico per la response con lo scopo di evitare
         di esporre dati sensibili come ad esempio la password, che di fatto viene
         esclusa perchè estendiamo solo BaseUser che non contiene il campo password di base.
     """
     id: int
-    username: str
-    firstname: str
-    lastname: str
-    role: RoleResponse
+    name: str
+    description: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
