@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 
-from request.user.user_request import UserRequest
-from response.user.user_response import UserResponse
+from models.request.user.user_request import UserRequest
+from models.response.user.user_response import UserResponse
 
 
 class UserServiceMeta(ABC):

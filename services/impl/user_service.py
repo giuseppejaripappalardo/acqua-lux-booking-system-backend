@@ -3,17 +3,18 @@ from typing import Type
 from fastapi import Depends
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
-from bcrypt_hash_password import PassowrdHasher
 from database.entities import User
 from database.repositories.impl.user_repository import UserRepository
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
+from exceptions.base_exception import AcquaLuxBaseException
 from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
-from logger_service import LoggerService
-from messages import Messages
-from request.user.user_request import UserRequest
-from response.user.user_response import UserResponse
+from models.request.user.user_request import UserRequest
+from models.response.user.user_response import UserResponse
 from services.meta.user_service_meta import UserServiceMeta
+from utils.bcrypt_hash_password import PassowrdHasher
+from utils.logger_service import LoggerService
+from utils.messages import Messages
 
 
 class UserService(UserServiceMeta):
@@ -41,11 +42,7 @@ class UserService(UserServiceMeta):
             response = self._user_repository.create(new_user)
             return UserResponse.model_validate(response)
         except IntegrityError as e:
-            self._logger_service.logger.info(f"Constraint violati: {e}")
             raise IntegrityDatabaseException(table_name="users")
-        except SQLAlchemyError as e:
-            self._logger_service.logger.info(f"{Messages.GENERIC_DATABASE_ERROR.value} {e}")
-            raise GenericDatabaseException(message=Messages.GENERIC_DATABASE_ERROR.value) from e
 
     def find_all(self) -> list[UserResponse]:
         try:
@@ -58,6 +55,6 @@ class UserService(UserServiceMeta):
             """
             parsed_response: list[UserResponse] = [UserResponse.model_validate(user) for user in raw_response]
             return parsed_response
-        except SQLAlchemyError as e:
+        except Exception as e:
             self._logger_service.logger.info(f"{Messages.GENERIC_DATABASE_ERROR.value} {e}")
-            raise GenericDatabaseException(message=Messages.GENERIC_DATABASE_ERROR.value) from e
+            raise AcquaLuxBaseException(message=Messages.GENERIC_DATABASE_ERROR.value) from e

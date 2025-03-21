@@ -12,7 +12,7 @@ class IntegrityDatabaseException(AcquaLuxBaseException):
     """
 
     def __init__(self,
-                 message: str = "Violazione dei vincoli di integrità del database",
+                 message: str = "Violation of database integrity constraints",
                  code: int = 400,
                  constraint_name: str = None,
                  table_name: str = None):
@@ -25,11 +25,11 @@ class IntegrityDatabaseException(AcquaLuxBaseException):
             più specifico che ci aiuti a debuggare il problema.
         """
         if constraint_name and table_name:
-            message = f"Violazione del vincolo '{constraint_name}' nella tabella '{table_name}'"
+            message = f"Violation of constraint '{constraint_name}' on table '{table_name}'"
         elif constraint_name:
-            message = f"Violazione del vincolo '{constraint_name}' nel database"
+            message = f"Violation of constraint '{constraint_name}' in the database"
         elif table_name:
-            message = f"Violazione dei vincoli di integrità nella tabella '{table_name}'"
+            message = f"Integrity constraint violation on table '{table_name}'"
 
         super().__init__(message, code)
 

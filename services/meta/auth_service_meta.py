@@ -1,14 +1,13 @@
 from abc import abstractmethod, ABC
 
-from fastapi import Response
-
-from response.auth.auth_response import TokenResponse
+from models.request.auth.auth_request import LoginRequest
+from models.response.auth.auth_response import TokenResponse
 
 
 class AuthServiceMeta(ABC):
 
     @abstractmethod
-    def login(self, username: str, password: str) -> dict:
+    def login(self, login: LoginRequest) -> TokenResponse:
         pass
 
     def refresh_token(self, refresh_token: str) -> TokenResponse:

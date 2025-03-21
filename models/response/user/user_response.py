@@ -1,6 +1,6 @@
 from pydantic import ConfigDict, BaseModel
 
-from response.role.role_response import RoleResponse
+from models.response.role.role_response import RoleResponse
 
 
 class UserResponse(BaseModel):

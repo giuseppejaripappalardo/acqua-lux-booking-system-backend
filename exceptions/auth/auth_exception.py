@@ -1,4 +1,4 @@
-from base_exception import AcquaLuxBaseException
+from exceptions.base_exception import AcquaLuxBaseException
 
 
 class AuthException(AcquaLuxBaseException):
