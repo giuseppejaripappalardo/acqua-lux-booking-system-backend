@@ -1,10 +1,9 @@
-import os
-
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 
 from controllers.base_controller import BaseController
-from routes.users import router as users_router
+from routes import router as application_router
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 app = FastAPI()
 
@@ -12,7 +11,8 @@ app = FastAPI()
     Esponiamo le routes dei controller previsti
     dal project work.
 """
-app.include_router(users_router)
+app.include_router(application_router)
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -24,7 +24,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """
     validation_errors = []
     for error in exc.errors():
-        # Raccogli informazioni sull'errore
         loc = error.get('loc', [])
         field = loc[-1] if loc else 'unknown'
         msg = error.get('msg', 'Errore di validazione')
@@ -39,4 +38,20 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         message="Data validation error",
         status_code=422,
         errors=validation_errors
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return BaseController().send_error(
+            message="Page not found",
+            status_code=404,
+            errors=[{"details": "The requested page was not found."}]
+        )
+
+    return BaseController().send_error(
+        message=exc.detail,
+        status_code=exc.status_code,
+        errors=None
     )

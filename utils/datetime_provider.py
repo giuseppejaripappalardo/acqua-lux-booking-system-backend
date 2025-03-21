@@ -1,6 +1,6 @@
 from datetime import datetime
+
 import pytz
-from sqlalchemy import text
 
 
 class DateTimeProvider:
