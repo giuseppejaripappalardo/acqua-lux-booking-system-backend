@@ -14,6 +14,8 @@ app = FastAPI()
 app.include_router(application_router)
 
 
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """

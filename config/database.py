@@ -48,9 +48,12 @@ class Database:
         self.session_local = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         self._initialized = True
 
-        if os.getenv('ENVIRONMENT_NAME') == 'dev':
-            self._logger.info("Ambiente dev, procediamo con la creazione dello schema del db.")
-            self.create_tables()
+        # Commento questo statement
+        # L'idea di generare lo schema in automatico può avere senso su dev
+        # Ma preferisco avere il controllo e gestire la migration con alembic manualmente.
+        # if os.getenv('ENVIRONMENT_NAME') == 'dev':
+        #     self._logger.info("Ambiente dev, procediamo con la creazione dello schema del db.")
+        #     self.create_tables()
 
     def get_db(self):
         db = self.session_local()

@@ -18,9 +18,9 @@ class UserController(BaseController):
         self._logger_service = logger_service
 
     @handle_exceptions
-    def create_user(self, user: UserRequest):
-        return self.send_success(self._user_service.create_user(user))
+    async def create_user(self, user: UserRequest):
+        return self._user_service.create_user(user)
 
     @handle_exceptions
-    def find_all(self):
-        return self.send_success(self._user_service.find_all())
+    async def find_all(self):
+        return self._user_service.find_all()

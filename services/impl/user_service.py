@@ -7,8 +7,8 @@ from bcrypt_hash_password import PassowrdHasher
 from database.entities import User
 from database.repositories.impl.user_repository import UserRepository
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
-from exceptions.generic.GenericDatabaseException import GenericDatabaseException
-from exceptions.generic.IntegrityDatabaseException import IntegrityDatabaseException
+from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
+from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from logger_service import LoggerService
 from messages import Messages
 from request.user.user_request import UserRequest

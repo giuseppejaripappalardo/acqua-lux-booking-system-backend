@@ -3,8 +3,9 @@ import traceback
 
 from pydantic import ValidationError
 
-from exceptions.generic.GenericDatabaseException import GenericDatabaseException
-from exceptions.generic.IntegrityDatabaseException import IntegrityDatabaseException
+from exceptions.auth.auth_exception import AuthException
+from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
+from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from messages import Messages
 
 
@@ -28,6 +29,9 @@ def handle_exceptions(func):
         except ValidationError as e:
             _log_error(self, func.__name__, e, "ValidationError")
             return self.send_error(str(e), status_code=422)
+        except AuthException as e:
+            _log_error(self, func.__name__, e, "AuthException")
+            return self.send_error(str(e), status_code=e.code)
         except Exception as e:
             _log_error(self, func.__name__, e, "Exception")
             return self.send_error(Messages.GENERIC_ERROR.value)
