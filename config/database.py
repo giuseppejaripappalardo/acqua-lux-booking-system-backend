@@ -2,8 +2,6 @@ import os
 
 from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import sessionmaker
-
-from database.entities import Base
 from utils.logger_service import LoggerService
 
 
@@ -48,25 +46,9 @@ class Database:
         self.session_local = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         self._initialized = True
 
-        # Commento questo statement
-        # L'idea di generare lo schema in automatico può avere senso su dev
-        # Ma preferisco avere il controllo e gestire la migration con alembic manualmente.
-        # if os.getenv('ENVIRONMENT_NAME') == 'dev':
-        #     self._logger.info("Ambiente dev, procediamo con la creazione dello schema del db.")
-        #     self.create_tables()
-
     def get_db(self):
         db = self.session_local()
         try:
             yield db
         finally:
             db.close()
-
-    def create_tables(self):
-        """
-            Usato solo per scopi di sviluppo per la creazione dello schema del db.
-            Fuori dall'ambiente di Dev possiamo sfruttare alembic, visto che ho
-            previsto la possibilità di gestire le migrations in questo modo.
-            (Vedi alembic versions)
-        """
-        Base.metadata.create_all(bind=self.engine)

@@ -1,7 +1,7 @@
-from datetime import datetime
 from typing import Optional
 
 from pydantic import ConfigDict, BaseModel
+
 
 class RoleResponse(BaseModel):
     """

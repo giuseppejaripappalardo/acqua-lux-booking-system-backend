@@ -1,15 +1,17 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import Relationship
+from datetime import datetime
 
-from database.entities import Base
+from sqlalchemy import String, DateTime
+from sqlalchemy.orm import Mapped, registry, relationship, DeclarativeBase
+from sqlalchemy.orm import mapped_column
+
+from database.entities.base import Base
 from utils.datetime_provider import DateTimeProvider
 
-class Role(Base):
 
+class Role(Base):
     __tablename__ = 'roles'
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(50), nullable=False, unique=True)
-    description = Column(String(255), nullable=True)
-    created_at = Column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)
-    modified_at = Column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(), onupdate=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)
-    users = Relationship("User", back_populates="role", lazy="joined")
+    id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    description: Mapped[str] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)
+    modified_at: Mapped[datetime] =  mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(), onupdate=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)

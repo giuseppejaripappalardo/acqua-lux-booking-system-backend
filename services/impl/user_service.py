@@ -1,20 +1,15 @@
 from typing import Type
 
 from fastapi import Depends
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
-from database.entities import User
+from database.entities.user import User
 from database.repositories.impl.user_repository import UserRepository
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
-from exceptions.base_exception import AcquaLuxBaseException
-from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
-from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from models.request.user.user_request import UserRequest
 from models.response.user.user_response import UserResponse
 from services.meta.user_service_meta import UserServiceMeta
 from utils.bcrypt_hash_password import PassowrdHasher
 from utils.logger_service import LoggerService
-from utils.messages import Messages
 
 
 class UserService(UserServiceMeta):
@@ -30,31 +25,25 @@ class UserService(UserServiceMeta):
         """
             Metodo preposto del service per la creazione degli utenti.
         """
-        try:
-            hashed_password = PassowrdHasher().bcrypt_hash_password(user.password)
-            new_user = User(
-                username=user.username,
-                password=hashed_password,
-                firstname=user.firstname,
-                lastname=user.lastname,
-                role_id=1
-            )
-            response = self._user_repository.create(new_user)
-            return UserResponse.model_validate(response)
-        except IntegrityError as e:
-            raise IntegrityDatabaseException(table_name="users")
+        hashed_password = PassowrdHasher().bcrypt_hash_password(user.password)
+        new_user = User(
+            username=user.username,
+            password=hashed_password,
+            firstname=user.firstname,
+            lastname=user.lastname,
+            role_id=1
+        )
+        response = self._user_repository.create(new_user)
+        return UserResponse.model_validate(response)
 
-    def find_all(self) -> list[UserResponse]:
-        try:
-            raw_response: list[Type[User]] = self._user_repository.find_all()
 
-            """
-                Sto usando list comprehension per evitare un ciclo standard.
-                Lo scopo è quello di chiamare il model_validate su ogni elemento.
-                Cosi pydantic farà il parse per validare i dati restituiti da SQL Alchemy.
-            """
-            parsed_response: list[UserResponse] = [UserResponse.model_validate(user) for user in raw_response]
-            return parsed_response
-        except Exception as e:
-            self._logger_service.logger.info(f"{Messages.GENERIC_DATABASE_ERROR.value} {e}")
-            raise AcquaLuxBaseException(message=Messages.GENERIC_DATABASE_ERROR.value) from e
+    def find_all(self) -> list[User]:
+        raw_response: list[User] = self._user_repository.find_all()
+
+        """
+            Sto usando list comprehension per evitare un ciclo standard.
+            Lo scopo è quello di chiamare il model_validate su ogni elemento.
+            Cosi pydantic farà il parse per validare i dati restituiti da SQL Alchemy.
+        """
+        #parsed_response: list[UserResponse] = [UserResponse.model_validate(user) for user in raw_response]
+        return raw_response

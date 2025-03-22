@@ -1,15 +1,15 @@
-from typing import List, Type
+from typing import Sequence
 
 from fastapi import Depends
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config.database import Database
+from database.entities.user import User
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
-from database.entities import User
 
 
 class UserRepository(UserRepositoryMeta):
-
     _db: Session = None
 
     def __init__(self, db: Session = Depends(Database().get_db)):
@@ -18,11 +18,13 @@ class UserRepository(UserRepositoryMeta):
     def create(self, user: User) -> User:
         self._db.add(user)
         self._db.commit()
-        self._db.refresh(user)
+        self._db.flush()
         return user
 
-    def find_all(self) -> list[Type[User]]:
-        return self._db.query(User).all()
+    def find_all(self) -> list[User]:
+        stmt = select(User)
+        return list(self._db.scalars(stmt))
 
     def get_by_username(self, username: str) -> User | None:
-        return self._db.query(User).filter(User.username == username).first()
+        stmt = select(User).where(User.username == username)
+        return self._db.scalar(stmt)

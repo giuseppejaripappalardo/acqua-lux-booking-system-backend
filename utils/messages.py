@@ -7,3 +7,4 @@ class Messages(Enum):
     MISSING_AUTHENTICATION_HEADER = "You do not have authorization to access this resource."
     INVALID_AUTH_TOKEN = "The provided authentication token is invalid or expired."
     INSUFFICIENT_ROLE_PERMISSIONS = "You do not have permission to access this resource."
+    NOT_FOUND = "The requested resource was not found."

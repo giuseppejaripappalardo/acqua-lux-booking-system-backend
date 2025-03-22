@@ -22,75 +22,46 @@ app.include_router(application_router)
 logger_service = LoggerService().logger
 
 
+@app.exception_handler(AuthException)
 @app.exception_handler(GenericDatabaseException)
 @app.exception_handler(IntegrityDatabaseException)
-async def database_exception_handler(request: Request, exc):
-    """Gestore unificato per le eccezioni del database"""
+@app.exception_handler(RoleException)
+@app.exception_handler(ValidationError)
+@app.exception_handler(StarletteHTTPException)
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc):
+    """
+        Gestore unificato per le eccezioni:
+        Database
+        Integrity
+        Auth Exception
+        Role Exception
+        Validation Exception
+    """
     exc_type = exc.__class__.__name__
+
+    if hasattr(exc, "status_code") and exc.status_code == 404:
+        # Loggo eventuali errori, in modo tale da poter recuperare
+        # Sempre il dettaglio di ciò che si verifica.
+        logger_service.error(f"{exc.__class__.__name__}: {str(exc)}")
+        return JSONResponse(
+            status_code=404,
+            content={
+                "success": False,
+                "message": Messages.NOT_FOUND.value,
+            },
+        )
 
     # Loggo eventuali errori, in modo tale da poter recuperare
     # Sempre il dettaglio di ciò che si verifica.
     logger_service.error(f"{exc_type}: {str(exc)}")
     return JSONResponse(
-        status_code=400,
+        status_code=exc.code if hasattr(exc, "code") else 500,
         content={
             "success": False,
             "message": exc.message if hasattr(exc, "message") else str(exc),
         }
     )
-
-@app.exception_handler(AuthException)
-async def auth_exception_handler(request: Request, exc: AuthException):
-    """
-        Questa eccezione viene sollevata in caso di problemi in fase di autenticazione.
-        Ad esempio quando l'utente digita le credenziali errate.
-    """
-
-    # Loggo eventuali errori, in modo tale da poter recuperare
-    # Sempre il dettaglio di ciò che si verifica.
-    logger_service.error(f"{exc.__class__.__name__}: {str(exc)}")
-    return JSONResponse(
-        status_code=exc.code,
-        content={
-            "success": False,
-            "message": str(exc),
-        }
-    )
-
-@app.exception_handler(RoleException)
-async def role_exception_handler(request: Request, exc: AuthException):
-    """
-        Questa eccezione viene sollevata in caso di ruolo non sufficiente per accedere ad una risorsa specifica.
-    """
-
-    # Loggo eventuali errori, in modo tale da poter recuperare
-    # Sempre il dettaglio di ciò che si verifica.
-    logger_service.error(f"{exc.__class__.__name__}: {str(exc)}")
-    return JSONResponse(
-        status_code=exc.code,
-        content={
-            "success": False,
-            "message": str(exc),
-        }
-    )
-
-
-
-@app.exception_handler(ValidationError)
-async def pydantic_validation_error_handler(request: Request, exc: ValidationError):
-    """Gestore per ValidationError di Pydantic, che si verifica durante la validazione di dati interni 
-    al modello o dei dati già deserializzati, a differenza di RequestValidationError che viene sollevato 
-    durante la validazione di input di una richiesta HTTP."""
-
-    logger_service.error(f"{exc.__class__.__name__}: {str(exc)}")
-    return JSONResponse(
-        status_code=422,
-        content={
-            "success": False,
-            "message": str(exc),
-        }
-    )
-
 
 
 @app.exception_handler(RequestValidationError)
@@ -98,6 +69,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """
         Questi tipi di errori vengono lanciati da pydantic nel caso in cui
         una richiesta non abbia i parametri corretti.
+        Gestiamo la risposta a queste eccezioni separatamente cosi da formattare meglio
+        la risposta e fornire un feedback dettagliato su quale campo ha avuto un errore.
     """
     validation_errors = []
     for error in exc.errors():
@@ -118,48 +91,5 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={
             "success": False,
             "message": validation_errors,
-        },
-    )
-
-
-@app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-    if exc.status_code == 404:
-        # Loggo eventuali errori, in modo tale da poter recuperare
-        # Sempre il dettaglio di ciò che si verifica.
-        logger_service.error(f"{exc.__class__.__name__}: {str(exc)}")
-        return JSONResponse(
-            status_code=404,
-            content={
-                "success": False,
-                "message": "Page not found",
-            },
-        )
-
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "success": False,
-            "message": exc.detail,
-        },
-    )
-
-
-@app.exception_handler(Exception)
-async def generic_exception_handler(request: Request, exc: Exception):
-    """
-        Gestore generico per le eccezioni
-        Lo scopo è catturare tutti i tipi di eccezioni
-        che di fatto non sono specifiche e quindi gestiste da un handler.
-    """
-
-    # Loggo eventuali errori, in modo tale da poter recuperare
-    # Sempre il dettaglio di ciò che si verifica.
-    logger_service.error(f"{exc.__class__.__name__}: {str(exc)}")
-    return JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "message": Messages.GENERIC_ERROR.value
         },
     )

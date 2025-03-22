@@ -16,5 +16,5 @@ class UserServiceMeta(ABC):
         pass
 
     @abstractmethod
-    def find_all(self) -> list[UserResponse]:
+    def find_all(self):
         pass
