@@ -5,6 +5,7 @@ from fastapi import Depends
 from database.entities.user import User
 from database.repositories.impl.user_repository import UserRepository
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
+from exceptions.users.user_already_exists import UserAlreadyExists
 from models.request.user.user_request import UserRequest
 from models.response.user.user_response import UserResponse
 from services.meta.user_service_meta import UserServiceMeta
@@ -33,6 +34,18 @@ class UserService(UserServiceMeta):
             lastname=user.lastname,
             role_id=1
         )
+
+        user_exist: User | None = self._user_repository.get_by_username(user.username)
+        """
+            Controllo se l'utente esiste già, se esiste lancio una eccezione specifica
+            Quest'ultima verrà catturata nel main dal gestore delle eccezioni globale.
+            Tecnicamente potrei farne a meno di fare il raise, perchè ci sarebbe un integrity
+            constraint violation, visto che lo username è unique, ma preferisco essere specifico
+            nella gestione delle eccezioni cosi da individuare subito il problema, se servisse.
+        """
+        if user_exist is not None:
+            raise UserAlreadyExists()
+
         response = self._user_repository.create(new_user)
         return UserResponse.model_validate(response)
 

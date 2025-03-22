@@ -1,5 +1,6 @@
 from fastapi import Depends
 
+from database.entities.user import User
 from database.repositories.impl.user_repository import UserRepository
 from exceptions.auth.auth_exception import AuthException
 from models.request.auth.auth_request import LoginRequest
@@ -20,16 +21,12 @@ class AuthService(AuthServiceMeta):
         self._user_repository = user_repository
 
     def login(self, login: LoginRequest) -> TokenResponse:
-        user = self._user_repository.get_by_username(login.username)
+        user: User = self._user_repository.get_by_username(login.username)
 
         if user is None or PassowrdHasher().bscript_verify_password(login.password, user.password) is False:
             self._logger_service.logger.error("Invalid username or password")
             raise AuthException("Invalid username or password")
         payload = {"sub": str(user.id), "role": user.role.name}
-        # "cookie_info": {
-        #     "key": "refresh_token",
-        #     "value": self._jwt_utils.create_refresh_token(payload),
-        # }
         return TokenResponse(
             jwt_token=JwtUtils.create_access_token(payload)
         )

@@ -1,11 +1,14 @@
 import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, URL, create_engine
-from sqlalchemy import pool
-
 from alembic import context
-from database.entities import base
+from sqlalchemy import URL, create_engine
+
+from database.entities.base import Base
+from database.entities.user import User
+from database.entities.role import Role
+from database.entities.boat import Boat
+from database.entities.boat_statuses import BoatsStatuses
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

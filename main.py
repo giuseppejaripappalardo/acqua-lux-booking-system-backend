@@ -9,6 +9,7 @@ from exceptions.auth.auth_exception import AuthException
 from exceptions.auth.role_exception import RoleException
 from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
+from exceptions.users.user_already_exists import UserAlreadyExists
 from utils.logger_service import LoggerService
 from utils.messages import Messages
 
@@ -23,6 +24,7 @@ logger_service = LoggerService().logger
 
 
 @app.exception_handler(AuthException)
+@app.exception_handler(UserAlreadyExists)
 @app.exception_handler(GenericDatabaseException)
 @app.exception_handler(IntegrityDatabaseException)
 @app.exception_handler(RoleException)
@@ -56,7 +58,7 @@ async def general_exception_handler(request: Request, exc):
     # Sempre il dettaglio di ciò che si verifica.
     logger_service.error(f"{exc_type}: {str(exc)}")
     return JSONResponse(
-        status_code=exc.code if hasattr(exc, "code") else 500,
+        status_code=exc.code if hasattr(exc, "code") and isinstance(exc.code, int) else 500,
         content={
             "success": False,
             "message": exc.message if hasattr(exc, "message") else str(exc),

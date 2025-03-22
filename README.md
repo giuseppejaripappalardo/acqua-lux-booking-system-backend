@@ -83,16 +83,30 @@ Questo progetto è distribuito con licenza MIT. Vedere il file `LICENSE` per mag
 
 ## ⚙️ Configurazione
 
+È necessario avere installato **Python 3.12** o una versione successiva per garantire il corretto funzionamento del
+backend.
+
+Prima di avviare il backend, è necessario installare tutte le dipendenze richieste. Nella root folder del progetto,
+eseguire il seguente comando:
+
+```bash
+pip install -r requirements.txt
+```
+
+
 È necessario definire le variabili d'ambiente per il corretto funzionamento del backend. Si consiglia di creare un file
 `environment.sh` o comunque assicurarsi che le seguenti variabili siano disponibili nel contesto di esecuzione:
 
 ```shell
-export DB_HOST=<hostname>
-export DB_NAME=<database_name>
-export DB_PASSWORD=<password>
-export DB_PORT=<port_number>
-export DB_USER=<username>
-export ENVIRONMENT_NAME=<environment_name>
+export DB_USER={db_user}
+export DB_PASSWORD={db_password}
+export DB_HOST={host}
+export DB_PORT=3306
+export DB_NAME=acqualux
+export ENVIRONMENT_NAME=dev
+export JWT_SECRET_KEY=secret
+export JWT_ALGORITHM=HS256
+export JWT_ACCESS_TOKEN_EXPIRE_MINUTES=3600
 ```
 
 Dopo aver inserito le informazioni all'interno del file, eseguire il comando:
@@ -100,3 +114,16 @@ Dopo aver inserito le informazioni all'interno del file, eseguire il comando:
 ```bash
 source config/environment.sh
 ```
+
+## 🚀 Avvio del Backend
+
+Per avviare il backend, assicurarsi che tutte le variabili d'ambiente siano correttamente configurate come descritto
+nella sezione sopra. Una volta fatto ciò, utilizzare il seguente comando:
+
+```bash
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Questo comando avvierà il server FastAPI in modalità di sviluppo, rendendo il backend disponibile all'indirizzo
+`http://127.0.0.1:8000`. L'opzione `--reload` consente di applicare automaticamente le modifiche al codice senza la
+necessità di riavviare manualmente il server.
