@@ -11,8 +11,8 @@ from models.object.token_payload import TokenPayload
 from models.request.auth.auth_request import LoginRequest
 from models.response.auth.auth_response import TokenResponse
 from services.meta.auth_service_meta import AuthServiceMeta
-from utils.bcrypt_hash_password import PassowrdHasher
-from utils.jwt_utils import JwtUtils
+from utils.security.bcrypt_hash_password import PassowrdHasher
+from utils.security.jwt_utils import JwtUtils
 from utils.logger_service import LoggerService
 
 

@@ -16,3 +16,9 @@ class BookingRepository(BookingRepositoryMeta):
     def find_all(self) -> list[Booking]:
         stmt = select(Booking)
         return list(self._db.scalars(stmt))
+
+    def make_reservation(self, reservation_data: Booking) -> Booking:
+        self._db.add(reservation_data)
+        self._db.commit()
+        self._db.refresh(reservation_data)
+        return reservation_data

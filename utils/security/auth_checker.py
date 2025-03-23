@@ -1,11 +1,11 @@
-from fastapi import Request, HTTPException, Depends
+from fastapi import Request, Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from models.object.token_payload import TokenPayload
-from utils.jwt_utils import JwtUtils
+from utils.security.jwt_utils import JwtUtils
 from exceptions.auth.auth_exception import AuthException
 from exceptions.auth.role_exception import RoleException
-from utils.messages import Messages
+from utils.enum.messages import Messages
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 

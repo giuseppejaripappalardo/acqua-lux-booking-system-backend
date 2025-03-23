@@ -4,9 +4,9 @@ from models.response.base_response import BaseResponse
 from models.response.role.role_response import RoleResponse
 from services.impl.role_service import RoleService
 from services.meta.role_service_meta import RoleServiceMeta
-from utils.auth_checker import AuthChecker
+from utils.security.auth_checker import AuthChecker
 from utils.format_response import success_response
-from utils.roles import Roles
+from utils.enum.roles import Roles
 
 router = APIRouter()
 

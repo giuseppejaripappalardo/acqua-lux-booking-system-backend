@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
-from models.request.booking.booking_request import BookingRequest
+from models.request.booking.search_boat_request import SearchBoatRequest
 from models.response.base_response import BaseResponse
 from models.response.boat.boat_response import BoatResponse
 from models.response.boat.boat_with_bookings_response import BoatWithBookingsResponse
@@ -21,9 +21,9 @@ async def boats_list(request: Request, boat_service: BoatServiceMeta = Depends(B
 
 @router.post(
     "/search_available_boats",
-    response_model=BaseResponse[list[BoatWithBookingsResponse]],
+    response_model=BaseResponse[list[BoatResponse]],
     summary="Mostra la lista delle imbarcazioni prenotabili nel range temporale fornito in input.",
     description="Recupera e restituisce un elenco di imbarcazioni disponibili alla prenotazione nel periodo specificato."
 )
-async def search_for_available_boats(request: Request, reservation_data: BookingRequest, boat_service: BoatServiceMeta = Depends(BoatService)) -> BaseResponse[list[BoatWithBookingsResponse]]:
+async def search_for_available_boats(reservation_data: SearchBoatRequest, boat_service: BoatServiceMeta = Depends(BoatService)) -> BaseResponse[list[BoatResponse]]:
     return success_response( boat_service.find_available_boats_for_booking(reservation_data))

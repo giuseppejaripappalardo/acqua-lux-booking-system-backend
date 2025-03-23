@@ -7,13 +7,14 @@ from starlette.responses import JSONResponse
 from controllers import router as application_router
 from exceptions.auth.auth_exception import AuthException
 from exceptions.auth.role_exception import RoleException
+from exceptions.booking.boat_already_booked_exception import BoatAlreadyBookedException
 from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from exceptions.users.user_already_exists import UserAlreadyExists
 from models.object.token_payload import TokenPayload
-from utils.auth_checker import AuthChecker
+from utils.security.auth_checker import AuthChecker
 from utils.logger_service import LoggerService
-from utils.messages import Messages
+from utils.enum.messages import Messages
 
 app = FastAPI()
 
@@ -55,6 +56,7 @@ async def check_auth_and_role(request: Request, call_next):
 """
 @app.exception_handler(AuthException)
 @app.exception_handler(UserAlreadyExists)
+@app.exception_handler(BoatAlreadyBookedException)
 @app.exception_handler(GenericDatabaseException)
 @app.exception_handler(IntegrityDatabaseException)
 @app.exception_handler(RoleException)

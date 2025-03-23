@@ -11,3 +11,5 @@ class Messages(Enum):
     START_DATE_GREATHER_OR_EQUAL_THAN = "The start date is greater or equal than the end datetime."
     START_DATE_LESS_THAN_CURRENT = "The start date is less than the current datetime."
     START_DATE_NEEDS_BUFFER = "The booking must start at least 1 hour after the current time."
+    MINIMUM_SEAT_REQUEST = "The minimum number of seats required is 1."
+    BOAT_ALREADY_BOOKED = "The boat is already booked. You cannot book it again for the same period."

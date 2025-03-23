@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from database.entities.role import Role
 
@@ -10,5 +10,6 @@ class RoleServiceMeta(ABC):
         Tecnicamente fa ciò che farebbe un'interfaccia.
     """
 
+    @abstractmethod
     def find_all(self) -> list[Role]:
         pass

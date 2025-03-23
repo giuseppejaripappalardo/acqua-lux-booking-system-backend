@@ -28,3 +28,7 @@ class UserRepository(UserRepositoryMeta):
     def get_by_username(self, username: str) -> User | None:
         stmt = select(User).where(User.username == username)
         return self._db.scalars(stmt).first()
+
+    def get_by_id(self, user_id: int) -> User | None:
+        stmt = select(User).where(User.id == id)
+        return self._db.scalars(stmt).first()

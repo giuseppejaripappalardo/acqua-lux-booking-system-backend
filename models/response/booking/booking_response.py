@@ -4,8 +4,8 @@ from decimal import Decimal
 from pydantic import BaseModel, ConfigDict
 
 from models.response.user.user_response import UserResponse
-from utils.booking_statuses import BookingStatuses
-from utils.payment_methods import PaymentMethods
+from utils.enum.booking_statuses import BookingStatuses
+from utils.enum.payment_methods import PaymentMethods
 
 
 class BookingResponse(BaseModel):

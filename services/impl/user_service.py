@@ -1,5 +1,3 @@
-from typing import Type
-
 from fastapi import Depends
 
 from database.entities.user import User
@@ -9,7 +7,7 @@ from exceptions.users.user_already_exists import UserAlreadyExists
 from models.request.user.user_request import UserRequest
 from models.response.user.user_response import UserResponse
 from services.meta.user_service_meta import UserServiceMeta
-from utils.bcrypt_hash_password import PassowrdHasher
+from utils.security.bcrypt_hash_password import PassowrdHasher
 from utils.logger_service import LoggerService
 
 

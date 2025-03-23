@@ -1,9 +1,17 @@
-from datetime import datetime
+from decimal import Decimal
 
-from pydantic import BaseModel
+from models.request.booking.search_boat_request import SearchBoatRequest
+from utils.enum.booking_statuses import BookingStatuses
+from utils.enum.payment_methods import PaymentMethods
 
 
-class BookingRequest(BaseModel):
-    seat_number: int
-    start_date: datetime
-    end_date: datetime
+class CustomerBookingRequest(SearchBoatRequest):
+    boat_id: int
+    notes: str
+    payment_method: PaymentMethods
+
+class BookingRequest(CustomerBookingRequest):
+    customer_id: int
+    reservation_code: str
+    reservation_status: BookingStatuses
+    total_price: Decimal
