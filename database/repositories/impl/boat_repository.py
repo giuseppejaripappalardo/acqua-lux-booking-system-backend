@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, and_
 from sqlalchemy.orm import Session
 
 from config.database import Database
@@ -26,48 +26,42 @@ class BoatRepository(BoatRepositoryMeta):
         return list(self._db.scalars(stmt))
 
     def find_available_boats_for_booking(self, booking_request: SearchBoatRequest) -> list[Boat]:
-        sovrapposte = (
-            select(Booking.boat_id)
-            .where(
-                Booking.start_date < booking_request.end_date,
-                Booking.end_date > booking_request.start_date
-            )
-            .subquery()
-        )
-
         stmt = (
             select(Boat)
             .join(BoatStatuses)
+            .outerjoin(
+                Booking,
+                and_(
+                    Booking.boat_id == Boat.id,
+                    Booking.start_date < booking_request.end_date,
+                    Booking.end_date > booking_request.start_date
+                )
+            )
             .where(
                 BoatStatuses.name == BoatStatusesValues.AVAILABLE.value,
                 Boat.seat >= booking_request.seat,
-                Boat.id.not_in(select(sovrapposte.c.boat_id))  # Esclude barche con prenotazioni sovrapposte
+                Booking.id.is_(None)  # Nessun booking in conflitto
             )
         )
-
         return list(self._db.scalars(stmt))
 
     def get_boat_to_book(self, booking_request: SearchBoatRequest) -> Boat:
-        sovrapposti = (
-            select(1)
-            .where(
-                Booking.boat_id == booking_request.boat_id,
-                Booking.start_date < booking_request.end_date,
-                Booking.end_date > booking_request.start_date
-            )
-            .exists()
-            .label("sovrapposti")
-        )
-
-
         stmt_boat = (
             select(Boat)
             .join(BoatStatuses)
+            .outerjoin(
+                Booking,
+                and_(
+                    Booking.boat_id == Boat.id,
+                    Booking.start_date < booking_request.end_date,
+                    Booking.end_date > booking_request.start_date
+                )
+            )
             .where(
                 BoatStatuses.name == BoatStatusesValues.AVAILABLE.value,
                 Boat.seat >= booking_request.seat,
                 Boat.id == booking_request.boat_id,
-                ~sovrapposti
+                Booking.id.is_(None)
             )
         )
         return self._db.scalar(stmt_boat)
