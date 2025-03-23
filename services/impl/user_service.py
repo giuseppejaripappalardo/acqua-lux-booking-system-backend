@@ -51,12 +51,4 @@ class UserService(UserServiceMeta):
 
 
     def find_all(self) -> list[User]:
-        raw_response: list[User] = self._user_repository.find_all()
-
-        """
-            Sto usando list comprehension per evitare un ciclo standard.
-            Lo scopo è quello di chiamare il model_validate su ogni elemento.
-            Cosi pydantic farà il parse per validare i dati restituiti da SQL Alchemy.
-        """
-        #parsed_response: list[UserResponse] = [UserResponse.model_validate(user) for user in raw_response]
-        return raw_response
+        return self._user_repository.find_all()

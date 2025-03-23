@@ -9,7 +9,7 @@ class DateTimeProvider:
         """
             Metodo di utilità per l'inserimento di date con SQL Alchemy.
         """
-        return datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S.%f")
+        return datetime.now(pytz.utc).isoformat()
 
     @staticmethod
     def parse_to_timezone(utc_timestamp: datetime) -> datetime:

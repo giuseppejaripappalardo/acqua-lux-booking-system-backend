@@ -10,6 +10,8 @@ from exceptions.auth.role_exception import RoleException
 from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from exceptions.users.user_already_exists import UserAlreadyExists
+from models.object.token_payload import TokenPayload
+from utils.auth_checker import AuthChecker
 from utils.logger_service import LoggerService
 from utils.messages import Messages
 
@@ -22,7 +24,35 @@ app = FastAPI()
 app.include_router(application_router)
 logger_service = LoggerService().logger
 
+"""
+    Middleware per proteggere le routes.
+    Verifichiamo se la routes richiede autenticazione
+    e gestiamo la request di conseguenza
+"""
+@app.middleware("http")
+async def check_auth_and_role(request: Request, call_next):
 
+    public_routes: list[str] = [
+        "/auth/login",
+        "/docs",
+        "/redoc",
+        "/openapi.json"
+    ]
+
+    # Se l'url visitato è presente nella lista di quelli pubblici
+    # Restituiamo la risposta senza effettuare il controllo per per l'autenticazione
+    if request.url.path in public_routes:
+        return await call_next(request)
+    else:
+        # In tutti gli altri casi chiamiamo il metodo per controllare se l'utente è autenticato ed infine ritorniamo la risposta.
+        user: TokenPayload = AuthChecker.assert_user_is_authenticated(request)
+
+    response = await call_next(request)
+    return response
+
+"""
+    Gestione delle eccezioni generali.
+"""
 @app.exception_handler(AuthException)
 @app.exception_handler(UserAlreadyExists)
 @app.exception_handler(GenericDatabaseException)
@@ -95,3 +125,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "message": validation_errors,
         },
     )
+"""
+    Gestione delle eccezioni generali.
+"""

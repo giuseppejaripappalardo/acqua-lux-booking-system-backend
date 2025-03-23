@@ -8,7 +8,8 @@ from database.entities.base import Base
 from database.entities.user import User
 from database.entities.role import Role
 from database.entities.boat import Boat
-from database.entities.boat_statuses import BoatsStatuses
+from database.entities.boat_statuses import BoatStatuses
+from database.entities.booking import Booking
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
