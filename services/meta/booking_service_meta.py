@@ -14,9 +14,13 @@ class BookingServiceMeta(ABC):
     """
 
     @abstractmethod
-    def find_all(self) -> list[Booking]:
+    def find_all(self, logged_user: TokenPayload) -> list[Booking]:
         pass
 
     @abstractmethod
     def make_reservation(self, reservation_data: CustomerBookingRequest, customer: TokenPayload) -> Booking:
+        pass
+
+    @abstractmethod
+    def delete_booking(self, logged_user: TokenPayload, booking_id: int) -> None:
         pass

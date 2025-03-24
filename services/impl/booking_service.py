@@ -11,15 +11,16 @@ from database.repositories.impl.user_repository import UserRepository
 from database.repositories.meta.boat_repository_meta import BoatRepositoryMeta
 from database.repositories.meta.booking_repository_meta import BookingRepositoryMeta
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
+from exceptions.base_exception import AcquaLuxBaseException
 from exceptions.booking.boat_already_booked_exception import BoatAlreadyBookedException
 from exceptions.booking.customer_not_found_exception import CustomerNotFoundException
+from exceptions.generic.generic_not_found_exception import GenericNotFoundException
 from models.object.token_payload import TokenPayload
-from models.request.booking.booking_request import CustomerBookingRequest, BookingRequest
-from models.response.boat.boat_response import BoatResponse
-from models.response.booking.booking_response import BookingResponse
+from models.request.booking.booking_request import CustomerBookingRequest
 from services.meta.booking_service_meta import BookingServiceMeta
 from utils.enum.booking_statuses import BookingStatuses
 from utils.enum.messages import Messages
+from utils.enum.roles import Roles
 from utils.logger_service import LoggerService
 from utils.validation.booking_validator import booking_validator
 
@@ -41,8 +42,14 @@ class BookingService(BookingServiceMeta):
         self._booking_repository = booking_repository
         self._boat_repository = boat_repository
 
-    def find_all(self) -> list[Booking]:
-        return self._booking_repository.find_all()
+    def find_all(self, logged_user: TokenPayload) -> list[Booking]:
+        result = None
+        if logged_user.role == Roles.ADMIN.value:
+            result = self._booking_repository.find_all()
+        else:
+            result = self._booking_repository.find_all_for_customer(int(logged_user.sub))
+
+        return result
 
     def make_reservation(self, reservation_data: CustomerBookingRequest, customer: TokenPayload) -> Booking:
         # Metodo preposto alla validazione
@@ -80,3 +87,23 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"data {reservation}")
 
         return self._booking_repository.make_reservation(reservation)
+
+    def delete_booking(self, logged_user: TokenPayload, booking_id: int) -> Booking:
+        booking_to_delete = self._booking_repository.get_booking(booking_id)
+        if booking_to_delete is None:
+            raise GenericNotFoundException()
+
+        """
+            Controllo fondamentale. Verifichiamo se la prenotazione è dell'utente che sta cercando
+            di cancellarla. In caso contrario lanciamo una eccezione. Solo l'utente con ruolo
+            ADMIN potrà cancellare qualsiasi prenotazione.
+        """
+        if  booking_to_delete.customer_id != logged_user.sub and logged_user.role != Roles.ADMIN.value:
+            raise AcquaLuxBaseException(message=Messages.DELETE_OPERATION_NOT_ALLOWED.value, code=403)
+
+        deleted = self._booking_repository.delete_booking(booking_to_delete)
+
+        if deleted == 0:
+            raise GenericNotFoundException(message=Messages.NO_BOOKINGS_DELETED.value, code=404)
+
+        return booking_to_delete

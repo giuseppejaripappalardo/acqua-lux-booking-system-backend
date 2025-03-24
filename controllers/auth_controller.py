@@ -14,5 +14,13 @@ router = APIRouter()
     response_model=BaseResponse[TokenResponse],
     summary="Questo endpoint permette di creare un nuovo utente nel sistema.",
     description="Fornisce la possibilità di aggiungere un nuovo utente fornendo i dati necessari.")
-async def login(credentials: LoginRequest, response: Response, request: Request, auth_service: AuthServiceMeta = Depends(AuthService)):
-    return success_response(auth_service.login(credentials))
+async def login(response: Response, credentials: LoginRequest, auth_service: AuthServiceMeta = Depends(AuthService)):
+    return success_response(auth_service.login(response, credentials))
+
+@router.post(
+    "/refresh_token",
+    response_model=BaseResponse[TokenResponse],
+    summary="Simula un meccanismo di refresh token per l'autenticazione.",
+    description="Legge il token JWT esistente dal cookie sicuro. Questa soluzione semplificata è utilizzata perché l'autenticazione è fuori dagli obiettivi del project work, evitando l'uso di localStorage (vulnerabile a XSS) ma senza implementare un vero sistema di refresh token.")
+async def refresh_token(request: Request, auth_service: AuthServiceMeta = Depends(AuthService)):
+    return success_response(auth_service.refresh(request))

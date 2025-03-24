@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 
 from models.request.auth.auth_request import LoginRequest
 from models.response.auth.auth_response import TokenResponse
-
+from fastapi import Response, Request
 
 class AuthServiceMeta(ABC):
     """
@@ -11,5 +11,10 @@ class AuthServiceMeta(ABC):
         Tecnicamente fa ciò che farebbe un'interfaccia.
     """
     @abstractmethod
-    def login(self, login: LoginRequest) -> TokenResponse:
+    def login(self, response: Response, login: LoginRequest) -> TokenResponse:
+        pass
+
+
+    @abstractmethod
+    def refresh(self, request: Request)-> TokenResponse:
         pass

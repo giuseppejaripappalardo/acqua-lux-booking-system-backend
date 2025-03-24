@@ -8,7 +8,7 @@ from controllers import router as application_router
 from exceptions.auth.auth_exception import AuthException
 from exceptions.auth.role_exception import RoleException
 from exceptions.booking.boat_already_booked_exception import BoatAlreadyBookedException
-from exceptions.generic.generic_database_exceptionen import GenericDatabaseException
+from exceptions.generic.generic_database_exception import GenericDatabaseException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from exceptions.users.user_already_exists import UserAlreadyExists
 from models.object.token_payload import TokenPayload
@@ -35,9 +35,10 @@ async def check_auth_and_role(request: Request, call_next):
 
     public_routes: list[str] = [
         "/auth/login",
+        "/auth/refresh_token",
         "/docs",
         "/redoc",
-        "/openapi.json"
+        "/openapi.json",
     ]
 
     # Se l'url visitato è presente nella lista di quelli pubblici

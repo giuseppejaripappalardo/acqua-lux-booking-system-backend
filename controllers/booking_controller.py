@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Request
 
-from models.request.booking.booking_request import CustomerBookingRequest
+from models.object.token_payload import TokenPayload
+from models.request.booking.booking_delete_request import BookingDeleteRequest
+from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
 from models.response.base_response import BaseResponse
 from models.response.booking.booking_response import BookingResponse
 from models.response.booking.booking_with_boat_response import BookingWithBoatResponse
@@ -18,15 +20,40 @@ router = APIRouter()
     summary="Mostra la lista di tutte le prenotazioni effettuate",
     description="Recupera e restituisce un elenco di tutte le prenotazioni registrate nel sistema."
 )
-async def booking_list(request: Request, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[list[BookingWithBoatResponse]]:
-    return success_response(booking_service.find_all())
+async def booking_list(request: Request, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[
+    list[BookingWithBoatResponse]]:
+    logged_user: TokenPayload = AuthChecker.get_logged_in_user(request)
+    return success_response(booking_service.find_all(logged_user))
+
 
 @router.post(
-    "/make_reservation",
+    "/reserve",
     response_model=BaseResponse[BookingResponse],
     summary="Questo endpoint permette di creare una nuova prenotazione nel sistema.",
     description="Accetta i dati della prenotazione e registra una nuova prenotazione nel sistema. Restituisce i dettagli della prenotazione creata con relativo ID di conferma."
 )
 async def make_reservation(request: Request, reservation_data: CustomerBookingRequest, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingResponse]:
     logged_user = AuthChecker.get_logged_in_user(request)
-    return success_response( booking_service.make_reservation(reservation_data, logged_user))
+    return success_response(booking_service.make_reservation(reservation_data, logged_user))
+
+
+@router.post(
+    "/edit",
+    response_model=BaseResponse[BookingResponse],
+    summary="Questo endpoint permette di modificare una prenotazione nel sistema.",
+    description="Questo endpoint consente di aggiornare i dettagli di una prenotazione esistente. Accetta i dati della prenotazione da modificare e li elabora, verificando che l'utente abbia le autorizzazioni necessarie. Restituisce i dettagli aggiornati della prenotazione con il relativo ID di conferma. La modifica è possibile solo se l'imbarcazione è disponibile per il nuovo periodo richiesto."
+)
+async def edit_reservation(request: Request, edit_reservation_data: EditBookingRequest, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingResponse]:
+    #TODO GESTIRE LOGICA DI MODIFICA
+    logged_user = AuthChecker.get_logged_in_user(request)
+    return success_response(booking_service.make_reservation(edit_reservation_data, logged_user))
+
+@router.delete(
+    "/delete",
+    response_model=BaseResponse[BookingResponse],
+    summary="Questo endpoint permette di cancellare una prenotazione esistente nel sistema.",
+    description="Elimina una prenotazione dal sistema utilizzando l'ID della prenotazione specificato. Restituisce l'esito dell'operazione di cancellazione."
+)
+async def delete_reservation(request: Request, booking_request: BookingDeleteRequest,booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingResponse]:
+    logged_user = AuthChecker.get_logged_in_user(request)
+    return success_response(booking_service.delete_booking(logged_user, booking_request.booking_id))

@@ -30,7 +30,7 @@ class UserService(UserServiceMeta):
             password=hashed_password,
             firstname=user.firstname,
             lastname=user.lastname,
-            role_id=1
+            role_id=user.role_id
         )
 
         user_exist: User | None = self._user_repository.get_by_username(user.username)

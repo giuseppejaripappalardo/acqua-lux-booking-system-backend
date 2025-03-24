@@ -1,7 +1,6 @@
-from decimal import Decimal
+from datetime import datetime
 
 from models.request.booking.search_boat_request import SearchBoatRequest
-from utils.enum.booking_statuses import BookingStatuses
 from utils.enum.payment_methods import PaymentMethods
 
 
@@ -10,8 +9,6 @@ class CustomerBookingRequest(SearchBoatRequest):
     notes: str
     payment_method: PaymentMethods
 
-class BookingRequest(CustomerBookingRequest):
-    customer_id: int
-    reservation_code: str
-    reservation_status: BookingStatuses
-    total_price: Decimal
+class EditBookingRequest(CustomerBookingRequest):
+    edit_start_date: datetime
+    edit_end_date: datetime
