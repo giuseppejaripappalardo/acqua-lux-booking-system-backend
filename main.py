@@ -30,15 +30,16 @@ logger_service = LoggerService().logger
     Verifichiamo se la routes richiede autenticazione
     e gestiamo la request di conseguenza
 """
+
+
 @app.middleware("http")
 async def check_auth_and_role(request: Request, call_next):
-
     public_routes: list[str] = [
-        "/auth/login",
-        "/auth/refresh_token",
-        "/docs",
-        "/redoc",
-        "/openapi.json",
+        "/api/v1/auth/login",
+        "/api/v1/auth/get_token",
+        "/api/v1/docs",
+        "/api/v1/redoc",
+        "/api/v1/openapi.json",
     ]
 
     # Se l'url visitato è presente nella lista di quelli pubblici
@@ -52,9 +53,12 @@ async def check_auth_and_role(request: Request, call_next):
     response = await call_next(request)
     return response
 
+
 """
     Gestione delle eccezioni generali.
 """
+
+
 @app.exception_handler(AuthException)
 @app.exception_handler(UserAlreadyExists)
 @app.exception_handler(BoatAlreadyBookedException)
@@ -87,17 +91,24 @@ async def general_exception_handler(request: Request, exc):
             },
         )
 
-    # Loggo eventuali errori, in modo tale da poter recuperare
-    # Sempre il dettaglio di ciò che si verifica.
-    logger_service.error(f"{exc_type}: {str(exc)}")
+
+    if hasattr(exc, "code") and isinstance(exc.code, int):
+        exception_code = exc.code
+    elif hasattr(exc, "status_code") and isinstance(exc.status_code, int):
+        exception_code = exc.status_code
+    else:
+        exception_code = 500
+
+    logger_service.error(f"{exc_type}: {str(exception_code)}")
+    logger_service.error(f"{exc.message}")
+
     return JSONResponse(
-        status_code=exc.code if hasattr(exc, "code") and isinstance(exc.code, int) else 500,
+        status_code=exception_code,
         content={
             "success": False,
             "message": exc.message if hasattr(exc, "message") else str(exc),
         }
     )
-
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -128,6 +139,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "message": validation_errors,
         },
     )
+
+
 """
     Gestione delle eccezioni generali.
 """

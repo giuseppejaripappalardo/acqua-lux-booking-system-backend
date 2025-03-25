@@ -5,7 +5,9 @@ from controllers.role_controller import router as roles
 from controllers.boat_controller import router as boats
 from controllers.booking_controller import router as bookings
 
-router = APIRouter()
+PREFIX = "/api/v1"
+
+router = APIRouter(prefix=PREFIX)
 router.include_router(users, prefix="/users", tags=["Users"])
 router.include_router(auth, prefix="/auth", tags=["Auth"])
 router.include_router(roles, prefix="/roles", tags=["Roles"])

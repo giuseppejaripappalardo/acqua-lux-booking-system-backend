@@ -36,9 +36,9 @@ class AuthService(AuthServiceMeta):
             raise AuthException("Invalid username or password")
 
         payload: TokenPayload = TokenPayload(
-            sub = str(user.id),
-            role = user.role.name,
-            exp = datetime.now(pytz.utc) + timedelta(minutes=int(self.ACCESS_TOKEN_EXPIRE_MINUTES))
+            sub=str(user.id),
+            role=user.role.name,
+            exp=datetime.now(pytz.utc) + timedelta(minutes=int(self.ACCESS_TOKEN_EXPIRE_MINUTES))
         )
 
         response_jwt_token = JwtUtils.create_access_token(payload)
@@ -72,11 +72,21 @@ class AuthService(AuthServiceMeta):
             user=logged_user_response
         )
 
-
-    def refresh(self, request: Request)-> TokenResponse:
+    def refresh(self, request: Request) -> TokenResponse:
         cookie_value = request.cookies.get("jwt_token")
         if cookie_value is None:
             raise AuthException(message=Messages.MISSING_AUTHENTICATION_HEADER.value)
+
+        """
+            Inserito qui il decode poiché al suo interno verifica anche la validità del token salvato nei cookie.   
+            Se non è valido fa il raise di un eccezione  
+        """
+        token_payload: TokenPayload = JwtUtils.decode_token(cookie_value)
+
+        user: User = self._user_repository.get_by_id(int(token_payload.sub))
+        self._logger_service.logger.info(f"User: {user.username} retrieving token")
+
         return TokenResponse(
-            jwt_token=cookie_value
+            jwt_token=cookie_value,
+            user=UserResponse.model_validate(user)
         )

@@ -20,8 +20,7 @@ router = APIRouter()
     summary="Mostra la lista di tutte le prenotazioni effettuate",
     description="Recupera e restituisce un elenco di tutte le prenotazioni registrate nel sistema."
 )
-async def booking_list(request: Request, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[
-    list[BookingWithBoatResponse]]:
+async def booking_list(request: Request, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[list[BookingWithBoatResponse]]:
     logged_user: TokenPayload = AuthChecker.get_logged_in_user(request)
     return success_response(booking_service.find_all(logged_user))
 

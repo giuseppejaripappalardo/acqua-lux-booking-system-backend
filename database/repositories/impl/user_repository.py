@@ -30,5 +30,5 @@ class UserRepository(UserRepositoryMeta):
         return self._db.scalars(stmt).first()
 
     def get_by_id(self, user_id: int) -> User | None:
-        stmt = select(User).where(User.id == id)
+        stmt = select(User).where(User.id == user_id)
         return self._db.scalars(stmt).first()
