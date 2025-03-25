@@ -26,7 +26,7 @@ async def booking_list(request: Request, booking_service: BookingServiceMeta = D
 
 
 @router.post(
-    "/reserve",
+    "/add",
     response_model=BaseResponse[BookingResponse],
     summary="Questo endpoint permette di creare una nuova prenotazione nel sistema.",
     description="Accetta i dati della prenotazione e registra una nuova prenotazione nel sistema. Restituisce i dettagli della prenotazione creata con relativo ID di conferma."
@@ -38,14 +38,13 @@ async def make_reservation(request: Request, reservation_data: CustomerBookingRe
 
 @router.post(
     "/edit",
-    response_model=BaseResponse[BookingResponse],
+    response_model=BaseResponse[BookingWithBoatResponse],
     summary="Questo endpoint permette di modificare una prenotazione nel sistema.",
     description="Questo endpoint consente di aggiornare i dettagli di una prenotazione esistente. Accetta i dati della prenotazione da modificare e li elabora, verificando che l'utente abbia le autorizzazioni necessarie. Restituisce i dettagli aggiornati della prenotazione con il relativo ID di conferma. La modifica è possibile solo se l'imbarcazione è disponibile per il nuovo periodo richiesto."
 )
-async def edit_reservation(request: Request, edit_reservation_data: EditBookingRequest, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingResponse]:
-    #TODO GESTIRE LOGICA DI MODIFICA
+async def edit_reservation(request: Request, edit_reservation_data: EditBookingRequest, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingWithBoatResponse]:
     logged_user = AuthChecker.get_logged_in_user(request)
-    return success_response(booking_service.make_reservation(edit_reservation_data, logged_user))
+    return success_response(booking_service.edit_reservation(edit_reservation_data, logged_user))
 
 @router.delete(
     "/delete",

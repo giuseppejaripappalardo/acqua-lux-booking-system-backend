@@ -15,3 +15,6 @@ class Messages(Enum):
     BOAT_ALREADY_BOOKED = "L'imbarcazione non è disponibile in quanto risulta già prenotata. Non è possibile procedere con la prenotazione. Prova con un altra imbarcazione o periodo di prenotazione."
     DELETE_OPERATION_NOT_ALLOWED = "Non puoi eliminare una prenotazione di un altro utente."
     NO_BOOKINGS_DELETED = "Nessuna prenotazione è stata eliminata."
+    BOOKING_TO_EDIT_NOT_FOUND = "La prenotazione che si sta tentando di modificare non è stata trovata."
+    BOOKING_CUSTOMER_ONLY = "La prenotazione può essere effettuata solo dal cliente e non da altri utenti."
+    BOOKING_MODIFICATION_NOT_ALLOWED="Non è possibile modificare una prenotazione già iniziata o terminata."

@@ -7,6 +7,7 @@ from database.entities.boat import Boat
 from database.entities.boat_statuses import BoatStatuses
 from database.entities.booking import Booking
 from database.repositories.meta.boat_repository_meta import BoatRepositoryMeta
+from models.object.token_payload import TokenPayload
 from models.request.booking.search_boat_request import SearchBoatRequest
 from utils.enum.boat_statuses_values import BoatStatusesValues
 from utils.logger_service import LoggerService
@@ -45,17 +46,39 @@ class BoatRepository(BoatRepositoryMeta):
         )
         return list(self._db.scalars(stmt))
 
-    def get_boat_to_book(self, booking_request: SearchBoatRequest) -> Boat:
+    def get_boat_to_book(self, booking_request: SearchBoatRequest, customer_id: int = None) -> Boat:
+        """
+            Questo metodo è utilizzato per capire se l'imbarcazione selezionata è disponibile
+            e può essere correttamente prenotata oppure se è già riservata.
+        """
+        booking_overlap_condition = and_(
+            Booking.boat_id == Boat.id,
+            Booking.start_date < booking_request.end_date,
+            Booking.end_date > booking_request.start_date
+        )
+
+        """
+            Quando viene fornito un customer_id, escludiamo le prenotazioni di questo cliente 
+            dal controllo di conflitti. Questo perché un cliente deve poter modificare la propria
+            prenotazione senza che il sistema la consideri come "già occupata".
+            In sostanza se il cliente ha già prenotato una barca e vuole cambiare le date 
+            della sua prenotazione, il sistema deve permetterglielo ignorando il fatto che quella 
+            risorsa risulti già occupata da lui stesso nel periodo richiesto.
+            Questo è importante prevalentemente per la modifica. In fase di prenotazione invece 
+            va bene non passare il customer_id.
+        """
+        if customer_id is not None:
+            booking_overlap_condition = and_(
+                booking_overlap_condition,
+                Booking.customer_id != customer_id
+            )
+
         stmt_boat = (
             select(Boat)
             .join(BoatStatuses)
             .outerjoin(
                 Booking,
-                and_(
-                    Booking.boat_id == Boat.id,
-                    Booking.start_date < booking_request.end_date,
-                    Booking.end_date > booking_request.start_date
-                )
+                booking_overlap_condition
             )
             .where(
                 BoatStatuses.name == BoatStatusesValues.AVAILABLE.value,

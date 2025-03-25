@@ -48,8 +48,7 @@ async def check_auth_and_role(request: Request, call_next):
         return await call_next(request)
     else:
         # In tutti gli altri casi chiamiamo il metodo per controllare se l'utente è autenticato ed infine ritorniamo la risposta.
-        user: TokenPayload = AuthChecker.assert_user_is_authenticated(request)
-
+        AuthChecker.assert_user_is_authenticated(request)
     response = await call_next(request)
     return response
 
@@ -100,7 +99,6 @@ async def general_exception_handler(request: Request, exc):
         exception_code = 500
 
     logger_service.error(f"{exc_type}: {str(exception_code)}")
-    logger_service.error(f"{exc.message}")
 
     return JSONResponse(
         status_code=exception_code,

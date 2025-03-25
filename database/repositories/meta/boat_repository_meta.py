@@ -15,5 +15,5 @@ class BoatRepositoryMeta(ABC):
         pass
 
     @abstractmethod
-    def get_boat_to_book(self, booking_request: SearchBoatRequest) -> Boat:
+    def get_boat_to_book(self, booking_request: SearchBoatRequest, customer_id: int = None) -> Boat:
         pass

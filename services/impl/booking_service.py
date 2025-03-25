@@ -1,7 +1,9 @@
 import math
+from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
+import pytz
 from fastapi import Depends
 
 from database.entities.booking import Booking
@@ -13,10 +15,9 @@ from database.repositories.meta.booking_repository_meta import BookingRepository
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
 from exceptions.base_exception import AcquaLuxBaseException
 from exceptions.booking.boat_already_booked_exception import BoatAlreadyBookedException
-from exceptions.booking.customer_not_found_exception import CustomerNotFoundException
 from exceptions.generic.generic_not_found_exception import GenericNotFoundException
 from models.object.token_payload import TokenPayload
-from models.request.booking.booking_request import CustomerBookingRequest
+from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
 from services.meta.booking_service_meta import BookingServiceMeta
 from utils.enum.booking_statuses import BookingStatuses
 from utils.enum.messages import Messages
@@ -35,8 +36,7 @@ class BookingService(BookingServiceMeta):
             self,
             log_service: LoggerService = Depends(LoggerService),
             booking_repository: BookingRepositoryMeta = Depends(BookingRepository),
-            boat_repository: BoatRepositoryMeta = Depends(BoatRepository),
-            user_respository: UserRepositoryMeta = Depends(UserRepository)
+            boat_repository: BoatRepositoryMeta = Depends(BoatRepository)
     ):
         self._logger_service = log_service
         self._booking_repository = booking_repository
@@ -57,6 +57,15 @@ class BookingService(BookingServiceMeta):
         # Se la validazione non viene superata vengono lanciate delle eccezioni
         booking_validator(reservation_data)
 
+        """
+            Ci assicuriamo qui che il tentativo di prenotazione viene fatto dall'utente autenticato.
+            Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
+            tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
+            se avviene da parte di un utente con ruolo ADMIN
+        """
+        if reservation_data.customer_id != customer.sub and customer.role != Roles.ADMIN.value:
+            raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
+
         self._logger_service.logger.info(f"before check")
 
         get_boat_to_book = self._boat_repository.get_boat_to_book(reservation_data)
@@ -68,8 +77,6 @@ class BookingService(BookingServiceMeta):
             raise BoatAlreadyBookedException(Messages.BOAT_ALREADY_BOOKED.value)
 
         self._logger_service.logger.info(f"after check for {get_boat_to_book}")
-        if customer is None:
-            raise CustomerNotFoundException()
 
         price_per_hour: Decimal = get_boat_to_book.price_per_hour
         diff_hours = math.ceil((reservation_data.end_date - reservation_data.start_date).total_seconds() / 3600)
@@ -87,6 +94,138 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"data {reservation}")
 
         return self._booking_repository.make_reservation(reservation)
+
+    def edit_reservation(self, reservation_data: EditBookingRequest, customer: TokenPayload) -> Booking:
+        reservation_to_edit = self._booking_repository.get_booking(reservation_data.booking_id)
+
+        """
+            Controlliamo se la prenotazione da modificare esiste.
+            Se non esiste lancio una eccezione con http code 404.
+        """
+        if reservation_to_edit is None:
+            self._logger_service.logger.info(f"Stiamo cercando di modificare una prenotazione che non esiste.")
+            raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
+
+        """
+            Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
+            Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
+            tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
+            se avviene da parte di un utente con ruolo ADMIN
+        """
+        if reservation_to_edit.customer_id != customer.sub and customer.role != Roles.ADMIN.value:
+            self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
+            raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
+
+        """
+            A questo punto un aspetto molto importante da verificare è quello di capire se si sta cercando di modificare una prenotazione già in corso.
+            Di base per semplificare le logiche, assumo che una prenotazione in corso non può più essere modificata.
+            Quindi se start_date è maggiore della current date allora non possiamo consentire la modifica. Vuol dire che il charter è già in corso.
+            Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
+        """
+        current_date = datetime.now(pytz.utc)
+        timezone = pytz.timezone("Europe/Rome")
+        start_date = reservation_to_edit.start_date
+
+        if start_date.tzinfo is None:
+            start_date = timezone.localize(start_date)
+            start_date = start_date.astimezone(pytz.utc)
+
+        if start_date <= current_date:
+            raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)
+
+        """
+            Verifico se effettivamente è stata cambiata anche l'imbarcazione.
+        """
+        boat_is_changed = reservation_to_edit.boat_id != reservation_data.boat_id
+
+        """
+            Costruisco il modello di dati necessario. Mi serve usare questo Type
+            Perchè possiamo sfruttare il polimorfismo con il validator che fa diversi controlli
+            sulla validità delle date previste per la prenotazione. Considerato che si tratta di una modifica
+            non possiamo dare nulla per scontato e gli stessi controlli previsti in fase di inserimento prenotazione
+            andranno rifatti in questa sede.
+        """
+        edited_reservation = CustomerBookingRequest(
+            start_date=reservation_data.start_date,
+            end_date=reservation_data.end_date,
+            boat_id= reservation_data.boat_id if boat_is_changed else reservation_to_edit.boat_id,
+            payment_method=reservation_to_edit.payment_method,
+            notes=reservation_data.notes,
+            seat=reservation_data.seat,
+        )
+
+        """
+            A questo punto prima pocedere con qualsiasi operazione chiamo il validator,
+            per verificare se i dati input che ho ricevuto sono conformi alle regole di validazione previste.
+        """
+        booking_validator(edited_reservation)
+
+        """
+            Se siamo arrivati fin qui ora dobbiamo controllare se l'imbarcazione è stata modificata.
+            Se è stata modificata allora dobbiamo capire se è effettivamente disponibile.
+        """
+        get_boat_to_book = self._boat_repository.get_boat_to_book(edited_reservation, customer.sub)
+
+        if get_boat_to_book is None:
+            self._logger_service.logger.info(f"L'imbarcazione che è stata scelta per la modifica non è disponibile. Non è possibile procedere con questa operazione.")
+            raise BoatAlreadyBookedException(Messages.BOAT_ALREADY_BOOKED.value)
+
+        """
+            Sul costo della prenotazione incidono le date, quindi dobbiamo valutare se anche queste sono cambiate, per effettuare
+            il ricalcolo.
+        """
+        dates_are_changed = (reservation_data.start_date != reservation_to_edit.start_date or
+                             reservation_data.end_date != reservation_to_edit.end_date)
+
+        # Di base setto qui il vecchio total amount. Se cambia verrà semplicemente sovrascritto e salvato.
+        total_amount: Decimal = reservation_to_edit.total_price
+
+        price_difference: Decimal = Decimal(0)
+        refund = False
+
+        if boat_is_changed or dates_are_changed:
+            """
+                Dobbiamo valutare a questo punto le differenze di costi tra l'imbarcazione precedente e la nuova.
+                Consideriamo anche che essendo un project work va fuori dagli scopi previsti. Quindi teniamo la logica
+                di calcolo qui. ma di fatto procederemo sempre con la prenotazione. Lato frontend verrà mostrata la differenza
+                del costo e simulato il pagamento.
+            """
+            new_boat_price_per_hour: Decimal = get_boat_to_book.price_per_hour
+            diff_hours = math.ceil((edited_reservation.end_date - edited_reservation.start_date).total_seconds() / 3600)
+            total_amount: Decimal = new_boat_price_per_hour * Decimal(diff_hours)
+            price_difference: Decimal = total_amount - reservation_to_edit.total_price
+
+            self._logger_service.logger.info(f"Le date o l'imbarcazione sono state modificate e ora c'è una differenza")
+            self._logger_service.logger.info(f"Date cambiata: {dates_are_changed} Boat cambiata: {boat_is_changed}")
+
+            if price_difference > 0:
+                self._logger_service.logger.info(f"C'è una differenza di prezzo {price_difference}")
+                self._logger_service.logger.info(f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
+            elif price_difference < 0:
+                refund = True
+                self._logger_service.logger.info(f"Significa che dobbiamo fare un rimborso, perché il nuovo charter costa meno del precedente")
+                self._logger_service.logger.info(f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
+            else:
+                self._logger_service.logger.info(f"Non ci sono differenze di prezzo, quindi non dobbiamo fare nessun rimborso")
+        else:
+            self._logger_service.logger.info(f"Non ci sono modifiche")
+
+        """
+            Se siamo arrivati fin qui abbiamo superato tutti i controlli. Significa che possiamo costruire il modello
+            per persisterlo nel database. Manteniamo il reservation_code visto che comunque si tratta di una modifica
+            di una prenotazione esistente.
+        """
+        reservation = Booking(
+            **edited_reservation.model_dump(),
+            id=reservation_data.booking_id,
+            reservation_code=reservation_to_edit.reservation_code,
+            reservation_status=BookingStatuses.CONFIRMED,
+            total_price=total_amount,
+            price_difference=price_difference,
+            requires_refund=refund
+        )
+
+        return self._booking_repository.edit_reservation(reservation)
 
     def delete_booking(self, logged_user: TokenPayload, booking_id: int) -> Booking:
         booking_to_delete = self._booking_repository.get_booking(booking_id)

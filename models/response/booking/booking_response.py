@@ -18,6 +18,8 @@ class BookingResponse(BaseModel):
     notes: str
     total_price: Decimal
     reservation_code: str
+    price_difference: Decimal
+    requires_refund: bool
     payment_method: PaymentMethods
     reservation_status: BookingStatuses
     created_at: datetime
