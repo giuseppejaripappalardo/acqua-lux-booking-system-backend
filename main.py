@@ -11,12 +11,11 @@ from exceptions.booking.boat_already_booked_exception import BoatAlreadyBookedEx
 from exceptions.generic.generic_database_exception import GenericDatabaseException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from exceptions.users.user_already_exists import UserAlreadyExists
-from models.object.token_payload import TokenPayload
-from utils.security.auth_checker import AuthChecker
-from utils.logger_service import LoggerService
 from utils.enum.messages import Messages
+from utils.logger_service import LoggerService
+from utils.security.auth_checker import AuthChecker
 
-app = FastAPI()
+app = FastAPI(root_path="api")
 
 """
     Esponiamo le controllers dei controller previsti
