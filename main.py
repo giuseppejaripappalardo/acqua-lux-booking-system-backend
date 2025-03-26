@@ -15,7 +15,7 @@ from utils.enum.messages import Messages
 from utils.logger_service import LoggerService
 from utils.security.auth_checker import AuthChecker
 
-app = FastAPI(root_path="api")
+app = FastAPI(root_path="/api")
 
 """
     Esponiamo le controllers dei controller previsti
