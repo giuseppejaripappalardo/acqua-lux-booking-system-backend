@@ -37,9 +37,9 @@ async def check_auth_and_role(request: Request, call_next):
     public_routes: list[str] = [
         "/api/v1/auth/login",
         "/api/v1/auth/get_token",
-        "/api/v1/docs",
-        "/api/v1/redoc",
-        "/api/v1/openapi.json",
+        "/docs",
+        "/redoc",
+        "/openapi.json",
     ]
 
     # Se l'url visitato è presente nella lista di quelli pubblici
