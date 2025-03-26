@@ -28,7 +28,7 @@ esigenze delle imprese del settore terziario di disporre di sistemi efficienti p
 repository contiene la componente backend del sistema, sviluppata seguendo le specifiche del project work che richiedeva
 l'utilizzo di Python per la creazione di API che gestiscano le logiche di prenotazione.
 
-Il sistema è stato progettato per essere intuitivo e di facile utilizzo, implementando le migliori pratiche di sviluppo
+Il sistema è stato progettato per essere intuitivo e di facile utilizzo, implementando le best practices di sviluppo
 software e garantendo un'esperienza utente ottimale attraverso API REST ben strutturate.
 
 ## 🛠️ Tecnologie Principali
