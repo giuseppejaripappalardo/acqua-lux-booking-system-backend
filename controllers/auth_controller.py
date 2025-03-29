@@ -20,7 +20,16 @@ async def login(response: Response, credentials: LoginRequest, auth_service: Aut
 @router.post(
     "/get_token",
     response_model=BaseResponse[TokenResponse],
-    summary="Simula un meccanismo di refresh token per l'autenticazione.",
-    description="Legge il token JWT esistente dal cookie sicuro. Questa soluzione semplificata è utilizzata perché l'autenticazione è fuori dagli obiettivi del project work, evitando l'uso di localStorage (vulnerabile a XSS) ma senza implementare un vero sistema di refresh token.")
+    summary="Il metodo serve per ottenere il token a partire da un cookie sicuro e non accessibile al frontend..",
+    description="Utilizziamo il cookie come strumento di salvataggio del token. Questo ci garantisce maggiore robustezza in quanto un cookie http only e Secure previene problemi di attacchi XSS, tipici nel caso in cui si salva il token in un cookie non sicuro o in localStorage.")
 async def get_token(request: Request, auth_service: AuthServiceMeta = Depends(AuthService)):
     return success_response(auth_service.refresh(request))
+
+
+@router.post(
+    "/logout",
+    response_model=BaseResponse,
+    summary="Il metodo distrugge semplicemente il cookie.",
+    description="Il metodo distrugge il cookie che contiene il token jwt. In un sistema più articolato avremmo previsto anche una blacklist. Ma va fuori dagli scopi del project work e quindi teniamo questo approccio semplificato.")
+async def logout(request: Request, response: Response, auth_service: AuthServiceMeta = Depends(AuthService)):
+    return success_response(auth_service.logout(request, response))

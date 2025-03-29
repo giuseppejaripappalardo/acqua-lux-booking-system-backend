@@ -7,6 +7,7 @@ from fastapi import Depends, Response, Request
 from database.entities.user import User
 from database.repositories.impl.user_repository import UserRepository
 from exceptions.auth.auth_exception import AuthException
+from exceptions.base_exception import AcquaLuxBaseException
 from models.object.token_payload import TokenPayload
 from models.request.auth.auth_request import LoginRequest
 from models.response.auth.auth_response import TokenResponse
@@ -22,6 +23,7 @@ class AuthService(AuthServiceMeta):
     _logger_service = None
     _user_repository = None
     ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", None)
+    JWT_COOKIE_NAME = "jwt_token"
 
     def __init__(self, logger_service: LoggerService = Depends(LoggerService),
                  user_repository: UserRepository = Depends(UserRepository)):
@@ -57,7 +59,7 @@ class AuthService(AuthServiceMeta):
             essere usato in futuro.
         """
         response.set_cookie(
-            key="jwt_token",
+            key=self.JWT_COOKIE_NAME,
             value=response_jwt_token,
             httponly=True,
             secure=True,
@@ -73,7 +75,7 @@ class AuthService(AuthServiceMeta):
         )
 
     def refresh(self, request: Request) -> TokenResponse:
-        cookie_value = request.cookies.get("jwt_token")
+        cookie_value = request.cookies.get(self.JWT_COOKIE_NAME)
         if cookie_value is None:
             raise AuthException(message=Messages.MISSING_AUTHENTICATION_HEADER.value)
 
@@ -90,3 +92,12 @@ class AuthService(AuthServiceMeta):
             jwt_token=cookie_value,
             user=UserResponse.model_validate(user)
         )
+
+    def logout(self, request: Request, response: Response) -> None:
+        cookie_value = request.cookies.get(self.JWT_COOKIE_NAME)
+        """
+            Se il cookie non esiste siamo apposto.
+        """
+        if cookie_value is None:
+            pass
+        response.delete_cookie(key=self.JWT_COOKIE_NAME)
