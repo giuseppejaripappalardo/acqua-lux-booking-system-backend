@@ -117,6 +117,27 @@ source config/environment.sh
 
 ## 🚀 Avvio del Backend
 
+Prima di avviare il backend è fondamentale che venga lanciato il comando per effettuare le migrations, collocate nel path /alembic/versions.
+In base alla configurazione standard del backend, alembic cercherà il database in cui migrare lo schema sulla base di quanto riportato nelle variabili
+d'ambiente.
+Quindi è fondamentale che le variabili d'ambiente siano disponibili nel contesto di esecuzione.
+
+Il comando per effettuare la migration è il seguente:
+
+```bash
+alembic upgrade head
+```
+
+Se la migrazione va a buon fine si avrà un messaggio simile a quello di seguito riportato:
+
+```bash
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+```
+
+Verificando il database predisposto, ci troveremo con le tabelle previste all'interno dello schema e una tabella generata da
+alembic denominata alembic_version.
+
 Per avviare il backend, assicurarsi che tutte le variabili d'ambiente siano correttamente configurate come descritto
 nella sezione sopra. Una volta fatto ciò, utilizzare il seguente comando:
 

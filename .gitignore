@@ -15,3 +15,5 @@ __pycache__/
 # ed è sempre buona pratica evitare che queste informazioni
 # vengano riportate sul repository ;)
 config/environment.sh
+
+.idea

@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from controllers import router as application_router
@@ -24,21 +25,39 @@ app = FastAPI(root_path="/api")
 app.include_router(application_router)
 logger_service = LoggerService().logger
 
+
+"""
+    Configurazione del middleware per le richieste cross-origin.
+"""
+
+origins: [str] = [
+    "https://giuseppejaripappalardo.dev",
+    "http://localhost:5173"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[""],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+    max_age=600,
+)
+
+
 """
     Middleware per proteggere le routes.
     Verifichiamo se la routes richiede autenticazione
     e gestiamo la request di conseguenza
 """
-
-
 @app.middleware("http")
 async def check_auth_and_role(request: Request, call_next):
     public_routes: list[str] = [
         "/api/v1/auth/login",
         "/api/v1/auth/get_token",
-        "/docs",
-        "/redoc",
-        "/openapi.json",
+        "/api/docs",
+        "/api/redoc",
+        "/api/openapi.json",
     ]
 
     # Se l'url visitato è presente nella lista di quelli pubblici
@@ -55,8 +74,6 @@ async def check_auth_and_role(request: Request, call_next):
 """
     Gestione delle eccezioni generali.
 """
-
-
 @app.exception_handler(AuthException)
 @app.exception_handler(UserAlreadyExists)
 @app.exception_handler(BoatAlreadyBookedException)
@@ -106,6 +123,9 @@ async def general_exception_handler(request: Request, exc):
             "message": exc.message if hasattr(exc, "message") else str(exc),
         }
     )
+"""
+    Fine gestione delle eccezioni generali.
+"""
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -136,8 +156,3 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "message": validation_errors,
         },
     )
-
-
-"""
-    Gestione delle eccezioni generali.
-"""

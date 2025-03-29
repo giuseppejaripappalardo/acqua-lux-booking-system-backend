@@ -12,5 +12,6 @@ class BoatResponse(BaseModel):
     seat: int
     price_per_hour: Decimal
     location: str
+    image_path: str
     boat_status: BoatStatusesResponse
     model_config = ConfigDict(from_attributes=True)
