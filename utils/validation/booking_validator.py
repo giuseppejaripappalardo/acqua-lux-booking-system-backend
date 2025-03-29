@@ -18,6 +18,7 @@ def booking_validator(booking_request: SearchBoatRequest):
         - Validazione cronologica delle date:
             - La data di inizio `start_date` deve essere precedente alla data di fine `end_date`.
             - La data di inizio deve essere futura rispetto all'ora corrente, applicando un buffer minimo di 1 ora per evitare prenotazioni immediate.
+            - La data di inizio e la data di fine devono avere una durata minima di almeno 1 ora.
 
         - Gestione dei timezone:
             - Se gli oggetti datetime ricevuti non specificano un timezone, viene assunto come default il timezone `Europe/Rome`.
@@ -82,6 +83,15 @@ def booking_validator(booking_request: SearchBoatRequest):
     current_date_with_buffer = current_date + timedelta(hours=1)
     if booking_request.start_date < current_date_with_buffer:
         raise InvalidDatetimeException(message=Messages.START_DATE_NEEDS_BUFFER.value)
+
+    """
+        Qui controlliamo la durata minima della prenotazione.
+        Se l'intervallo tra la data di fine e la data di inizio è inferiore a 1 ora,
+        lanciamo un InvalidDatetimeException.
+    """
+    if booking_request.end_date - booking_request.start_date < timedelta(hours=1):
+        raise InvalidDatetimeException(message=Messages.MIN_DURATION_NOT_SATISFIED.value)
+
 
     if booking_request.seat < 1:
         raise IntegrityDatabaseException(Messages.MINIMUM_SEAT_REQUEST.value)

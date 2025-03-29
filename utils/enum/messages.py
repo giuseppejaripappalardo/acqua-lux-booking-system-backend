@@ -11,6 +11,7 @@ class Messages(Enum):
     START_DATE_GREATHER_OR_EQUAL_THAN = "La data di inizio è maggiore o uguale alla data di fine."
     START_DATE_LESS_THAN_CURRENT = "La data di inizio è precedente al momento attuale."
     START_DATE_NEEDS_BUFFER = "La prenotazione deve iniziare almeno 1 ora dopo l'orario attuale."
+    MIN_DURATION_NOT_SATISFIED = "La prenotazione deve avere una durata minima di 1 ora."
     MINIMUM_SEAT_REQUEST = "Il numero minimo di posti richiesti è 1."
     BOAT_ALREADY_BOOKED = "L'imbarcazione non è disponibile in quanto risulta già prenotata. Non è possibile procedere con la prenotazione. Prova con un altra imbarcazione o periodo di prenotazione."
     DELETE_OPERATION_NOT_ALLOWED = "Non puoi eliminare una prenotazione di un altro utente."
