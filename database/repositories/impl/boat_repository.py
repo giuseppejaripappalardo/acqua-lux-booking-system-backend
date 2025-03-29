@@ -41,7 +41,8 @@ class BoatRepository(BoatRepositoryMeta):
             .where(
                 BoatStatuses.name == BoatStatusesValues.AVAILABLE.value,
                 Boat.seat >= booking_request.seat,
-                Booking.id.is_(None)  # Nessun booking in conflitto
+                # Nessun booking in conflitto
+                Booking.id.is_(None)
             )
         )
         return list(self._db.scalars(stmt))
