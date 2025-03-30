@@ -114,6 +114,16 @@ class BookingService(BookingServiceMeta):
             self._logger_service.logger.info(f"Stiamo cercando di modificare una prenotazione che non esiste.")
             raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
 
+
+        """
+            Controllo se lo stato è incompatibile con la modifica.
+            Al momento prevedo che soltanto le prenotazioni confermate possono
+            essere modificate.
+        """
+        if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED.value:
+            raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
+
+
         """
             Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
             Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
