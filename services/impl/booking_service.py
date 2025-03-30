@@ -120,7 +120,7 @@ class BookingService(BookingServiceMeta):
             tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
             se avviene da parte di un utente con ruolo ADMIN
         """
-        if int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN.value:
+        if int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN:
             self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
             raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
 
