@@ -124,11 +124,6 @@ class BookingService(BookingServiceMeta):
             self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
             raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
 
-
-        self._logger_service.logger.info(f"before check")
-        self._logger_service.logger.info(f"enum type {type(BookingStatuses.CONFIRMED)} {BookingStatuses.CONFIRMED}")
-        self._logger_service.logger.info(f"db type {type(reservation_to_edit.reservation_status)} {reservation_to_edit.reservation_status}")
-        self._logger_service.logger.info(f"check {reservation_to_edit.reservation_status == BookingStatuses.CONFIRMED}")
         """
             Controllo se lo stato è incompatibile con la modifica.
             Al momento prevedo che soltanto le prenotazioni confermate possono
