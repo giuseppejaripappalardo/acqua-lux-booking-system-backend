@@ -125,8 +125,8 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"condizione: {int(reservation_to_edit.customer_id) != int(customer.sub)}")
         self._logger_service.logger.info(f"condizione: {type(reservation_to_edit.customer_id)}")
         self._logger_service.logger.info(f"condizione: {type(customer.sub)}")
-        self._logger_service.logger.info(f"condizione: {type(customer.role)}")
-        self._logger_service.logger.info(f"condizione: {type(Roles.ADMIN)}")
+        self._logger_service.logger.info(f"role: {type(customer.role)}")
+        self._logger_service.logger.info(f"Enum role: {type(Roles.ADMIN)}")
 
         self._logger_service.logger.info(
             f"customer_id: {reservation_to_edit.customer_id}, sub: {customer.sub}, sono diversi? {reservation_to_edit.customer_id != customer.sub}")
