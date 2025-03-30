@@ -121,10 +121,10 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"Tipo CONFIRMED.value: {type(BookingStatuses.CONFIRMED.value)}")
 
 
-        self._logger_service.logger.info(f"condizione: {reservation_to_edit.customer_id != customer.sub and customer.role != Roles.ADMIN}")
-        self._logger_service.logger.info(f"condizione: {reservation_to_edit.customer_id != customer.sub}")
-        self._logger_service.logger.info(f"condizione: {reservation_to_edit.customer_id}")
-        self._logger_service.logger.info(f"condizione: {customer.sub}")
+        self._logger_service.logger.info(f"condizione: {int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN}")
+        self._logger_service.logger.info(f"condizione: {int(reservation_to_edit.customer_id) != int(customer.sub)}")
+        self._logger_service.logger.info(f"condizione: {type(reservation_to_edit.customer_id)}")
+        self._logger_service.logger.info(f"condizione: {type(customer.sub)}")
         self._logger_service.logger.info(f"condizione: {customer.role != Roles.ADMIN}")
         self._logger_service.logger.info(f"condizione: {customer.role}")
 
