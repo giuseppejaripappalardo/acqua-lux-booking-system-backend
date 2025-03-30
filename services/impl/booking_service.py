@@ -120,6 +120,16 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"Tipo reservation_status: {type(reservation_to_edit.reservation_status)}")
         self._logger_service.logger.info(f"Tipo CONFIRMED.value: {type(BookingStatuses.CONFIRMED.value)}")
 
+        """
+            Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
+            Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
+            tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
+            se avviene da parte di un utente con ruolo ADMIN
+        """
+        if reservation_to_edit.customer_id != customer.sub and customer.role != Roles.ADMIN.value:
+            self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
+            raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
+
 
         """
             Controllo se lo stato è incompatibile con la modifica.
@@ -130,15 +140,6 @@ class BookingService(BookingServiceMeta):
             raise AcquaLuxBaseException(message=Messages.ATTEMPT_TO_EDIT_INCOMPATIBLE_STATE.value, code=422)
 
 
-        """
-            Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
-            Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
-            tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
-            se avviene da parte di un utente con ruolo ADMIN
-        """
-        if reservation_to_edit.customer_id != customer.sub and customer.role != Roles.ADMIN.value:
-            self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
-            raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
 
         """
             A questo punto un aspetto molto importante da verificare è quello di capire se si sta cercando di modificare una prenotazione già in corso.
