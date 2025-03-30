@@ -128,6 +128,12 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"condizione: {customer.role != Roles.ADMIN}")
         self._logger_service.logger.info(f"condizione: {customer.role}")
 
+        self._logger_service.logger.info(
+            f"customer_id: {reservation_to_edit.customer_id}, sub: {customer.sub}, sono diversi? {reservation_to_edit.customer_id != customer.sub}")
+        self._logger_service.logger.info(
+            f"role: {customer.role}, ADMIN.value: {Roles.ADMIN.value}, non è admin? {customer.role != Roles.ADMIN.value}")
+
+
         """
             Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
             Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
