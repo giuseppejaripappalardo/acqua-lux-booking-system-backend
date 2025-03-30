@@ -115,15 +115,16 @@ class BookingService(BookingServiceMeta):
             raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
 
 
-        self._logger_service.logger.info(f"entity role {type(customer.role)}")
-        self._logger_service.logger.info(f"enum role {type(Roles.ADMIN)}")
         """
             Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
             Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
             tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
-            se avviene da parte di un utente con ruolo ADMIN
+            se avviene da parte di un utente con ruolo ADMIN.
+            
+            NOTA: poichè customer.role arriva dal TokenPayload il controllo deve necessariamente essere fatto con
+            Roles.ADMIN.value per confrontare due stringhe.
         """
-        if int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN:
+        if int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN.value:
             self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
             raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
 
