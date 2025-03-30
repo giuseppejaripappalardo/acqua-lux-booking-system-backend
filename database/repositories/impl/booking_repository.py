@@ -9,6 +9,7 @@ from config.database import Database
 from database.entities.booking import Booking
 from database.repositories.meta.booking_repository_meta import BookingRepositoryMeta
 from exceptions.generic.generic_not_found_exception import GenericNotFoundException
+from utils.enum.booking_statuses import BookingStatuses
 
 
 class BookingRepository(BookingRepositoryMeta):
@@ -59,7 +60,8 @@ class BookingRepository(BookingRepositoryMeta):
         stmt = select(Booking).where(
             Booking.customer_id == customer_id,
             Booking.start_date < end_date,
-            Booking.end_date > start_date
+            Booking.end_date > start_date,
+            Booking.reservation_status == BookingStatuses.CONFIRMED.value
         )
         return self._db.scalar(stmt) is not None
 

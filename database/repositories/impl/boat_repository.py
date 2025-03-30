@@ -9,6 +9,7 @@ from database.entities.booking import Booking
 from database.repositories.meta.boat_repository_meta import BoatRepositoryMeta
 from models.request.booking.search_boat_request import SearchBoatRequest
 from utils.enum.boat_statuses_values import BoatStatusesValues
+from utils.enum.booking_statuses import BookingStatuses
 from utils.logger_service import LoggerService
 
 
@@ -34,7 +35,8 @@ class BoatRepository(BoatRepositoryMeta):
                 and_(
                     Booking.boat_id == Boat.id,
                     Booking.start_date < booking_request.end_date,
-                    Booking.end_date > booking_request.start_date
+                    Booking.end_date > booking_request.start_date,
+                    Booking.reservation_status == BookingStatuses.CONFIRMED.value
                 )
             )
             .where(
@@ -54,7 +56,8 @@ class BoatRepository(BoatRepositoryMeta):
         booking_overlap_condition = and_(
             Booking.boat_id == Boat.id,
             Booking.start_date < booking_request.end_date,
-            Booking.end_date > booking_request.start_date
+            Booking.end_date > booking_request.start_date,
+            Booking.reservation_status == BookingStatuses.CONFIRMED.value
         )
 
         """
