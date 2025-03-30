@@ -114,25 +114,11 @@ class BookingService(BookingServiceMeta):
             self._logger_service.logger.info(f"Stiamo cercando di modificare una prenotazione che non esiste.")
             raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
 
-        self._logger_service.logger.info(f"Stato prenotazione: '{reservation_to_edit.reservation_status}'")
-        self._logger_service.logger.info(f"Valore CONFIRMED enum: '{BookingStatuses.CONFIRMED.value}'")
-        self._logger_service.logger.info(f"Sono uguali? {reservation_to_edit.reservation_status == BookingStatuses.CONFIRMED.value}")
-        self._logger_service.logger.info(f"Tipo reservation_status: {type(reservation_to_edit.reservation_status)}")
-        self._logger_service.logger.info(f"Tipo CONFIRMED.value: {type(BookingStatuses.CONFIRMED.value)}")
 
-
-        self._logger_service.logger.info(f"condizione: {int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN}")
-        self._logger_service.logger.info(f"condizione: {int(reservation_to_edit.customer_id) != int(customer.sub)}")
-        self._logger_service.logger.info(f"condizione: {type(reservation_to_edit.customer_id)}")
-        self._logger_service.logger.info(f"condizione: {type(customer.sub)}")
-        self._logger_service.logger.info(f"role: {type(customer.role)}")
-        self._logger_service.logger.info(f"Enum role: {type(Roles.ADMIN)}")
-
-        self._logger_service.logger.info(
-            f"customer_id: {reservation_to_edit.customer_id}, sub: {customer.sub}, sono diversi? {reservation_to_edit.customer_id != customer.sub}")
-        self._logger_service.logger.info(
-            f"role: {customer.role}, ADMIN.value: {Roles.ADMIN.value}, non è admin? {customer.role != Roles.ADMIN.value}")
-
+        self._logger_service.logger.info(f"before check")
+        self._logger_service.logger.info(f"enum type {type(Roles.ADMIN.value)} {Roles.ADMIN.value}")
+        self._logger_service.logger.info(f"db type {type(customer.role)} {customer.role}")
+        self._logger_service.logger.info(f"check {customer.role == Roles.ADMIN.value}")
 
         """
             Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
@@ -140,7 +126,7 @@ class BookingService(BookingServiceMeta):
             tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
             se avviene da parte di un utente con ruolo ADMIN
         """
-        if int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN:
+        if int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN.value:
             self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
             raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
 
@@ -150,7 +136,7 @@ class BookingService(BookingServiceMeta):
             Al momento prevedo che soltanto le prenotazioni confermate possono
             essere modificate.
         """
-        if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED:
+        if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED.value:
             raise AcquaLuxBaseException(message=Messages.ATTEMPT_TO_EDIT_INCOMPATIBLE_STATE.value, code=422)
 
 
