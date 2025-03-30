@@ -114,13 +114,19 @@ class BookingService(BookingServiceMeta):
             self._logger_service.logger.info(f"Stiamo cercando di modificare una prenotazione che non esiste.")
             raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
 
+        self._logger_service.logger.info(f"Stato prenotazione: '{reservation_to_edit.reservation_status}'")
+        self._logger_service.logger.info(f"Valore CONFIRMED enum: '{BookingStatuses.CONFIRMED.value}'")
+        self._logger_service.logger.info(f"Sono uguali? {reservation_to_edit.reservation_status == BookingStatuses.CONFIRMED.value}")
+        self._logger_service.logger.info(f"Tipo reservation_status: {type(reservation_to_edit.reservation_status)}")
+        self._logger_service.logger.info(f"Tipo CONFIRMED.value: {type(BookingStatuses.CONFIRMED.value)}")
+
 
         """
             Controllo se lo stato è incompatibile con la modifica.
             Al momento prevedo che soltanto le prenotazioni confermate possono
             essere modificate.
         """
-        if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED.value:
+        if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED:
             raise AcquaLuxBaseException(message=Messages.ATTEMPT_TO_EDIT_INCOMPATIBLE_STATE.value, code=422)
 
 
