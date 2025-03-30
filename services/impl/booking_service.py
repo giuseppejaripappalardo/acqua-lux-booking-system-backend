@@ -57,15 +57,6 @@ class BookingService(BookingServiceMeta):
         # Se la validazione non viene superata vengono lanciate delle eccezioni
         booking_validator(reservation_data)
 
-        """
-            Ci assicuriamo qui che il tentativo di prenotazione viene fatto dall'utente autenticato.
-            Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
-            tentando di fare la prenotazione per qualcun'altro. Questa operazione sarà consentita solo 
-            se avviene da parte di un utente con ruolo ADMIN
-        """
-        if reservation_data.customer_id != customer.sub and customer.role != Roles.ADMIN.value:
-            raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
-
         self._logger_service.logger.info(f"before check")
 
         get_boat_to_book = self._boat_repository.get_boat_to_book(reservation_data)
