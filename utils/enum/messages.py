@@ -18,4 +18,5 @@ class Messages(Enum):
     NO_BOOKINGS_DELETED = "Nessuna prenotazione è stata eliminata."
     BOOKING_TO_EDIT_NOT_FOUND = "La prenotazione che si sta tentando di modificare non è stata trovata."
     BOOKING_CUSTOMER_ONLY = "La prenotazione può essere effettuata solo dal cliente e non da altri utenti."
-    BOOKING_MODIFICATION_NOT_ALLOWED="Non è possibile modificare una prenotazione già iniziata o terminata."
+    BOOKING_MODIFICATION_NOT_ALLOWED = "Non è possibile modificare una prenotazione già iniziata o terminata."
+    CUSTOMER_ALREADY_HAS_BOOKING = "Hai già una prenotazione attiva per lo stesso arco temporale. Non è possibile effettuare prenotazioni simultaneamente. Cambia le date e riprova."

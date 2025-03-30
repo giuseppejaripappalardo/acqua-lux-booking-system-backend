@@ -52,9 +52,11 @@ class BookingService(BookingServiceMeta):
         return result
 
     def make_reservation(self, reservation_data: CustomerBookingRequest, customer: TokenPayload) -> Booking:
-        # Metodo preposto alla validazione
-        # Consultare l'implementazione per avere tutti i dettagli.
-        # Se la validazione non viene superata vengono lanciate delle eccezioni
+        """
+            Metodo preposto alla validazione
+            Consultare l'implementazione per avere tutti i dettagli.
+            Se la validazione non viene superata vengono lanciate delle eccezioni
+        """
         booking_validator(reservation_data)
 
         self._logger_service.logger.info(f"before check")
@@ -63,11 +65,26 @@ class BookingService(BookingServiceMeta):
 
         self._logger_service.logger.info(f"boat {get_boat_to_book}")
 
+        """
+            Se il risultato è note significa che l'imbarcazione selezionata non è disponibile.
+            Restituisco un messaggio di errore informativo.
+        """
         if get_boat_to_book is None:
             self._logger_service.logger.info(f"is none so raise error")
             raise BoatAlreadyBookedException(Messages.BOAT_ALREADY_BOOKED.value)
 
         self._logger_service.logger.info(f"after check for {get_boat_to_book}")
+
+        self._logger_service.logger.info(f"date {reservation_data.start_date} - {reservation_data.end_date}")
+
+        """
+            Controllo se l'utente ha già prenotazioni nello stesso range temporale per cui intende prenotare.
+            In caso positivo lancio una eccezione. Per scelta di progettazione non consento prenotazioni simultanee.
+        """
+        check_customer_existing_booking = self._booking_repository.check_customer_existing_bookings(int(customer.sub), reservation_data.start_date, reservation_data.end_date)
+        if check_customer_existing_booking:
+            self._logger_service.logger.info(f"Cliente {customer.sub} ha già una prenotazione per questo periodo")
+            raise BoatAlreadyBookedException(Messages.CUSTOMER_ALREADY_HAS_BOOKING.value)
 
         price_per_hour: Decimal = get_boat_to_book.price_per_hour
         diff_hours = math.ceil((reservation_data.end_date - reservation_data.start_date).total_seconds() / 3600)
@@ -155,7 +172,7 @@ class BookingService(BookingServiceMeta):
             Se siamo arrivati fin qui ora dobbiamo controllare se l'imbarcazione è stata modificata.
             Se è stata modificata allora dobbiamo capire se è effettivamente disponibile.
         """
-        get_boat_to_book = self._boat_repository.get_boat_to_book(edited_reservation, customer.sub)
+        get_boat_to_book = self._boat_repository.get_boat_to_book(edited_reservation, int(customer.sub))
 
         if get_boat_to_book is None:
             self._logger_service.logger.info(f"L'imbarcazione che è stata scelta per la modifica non è disponibile. Non è possibile procedere con questa operazione.")

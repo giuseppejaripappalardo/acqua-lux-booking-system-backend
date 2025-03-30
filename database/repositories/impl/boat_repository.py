@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from fastapi import Depends
-from sqlalchemy import select, or_, and_
+from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 
 from config.database import Database
@@ -7,7 +9,6 @@ from database.entities.boat import Boat
 from database.entities.boat_statuses import BoatStatuses
 from database.entities.booking import Booking
 from database.repositories.meta.boat_repository_meta import BoatRepositoryMeta
-from models.object.token_payload import TokenPayload
 from models.request.booking.search_boat_request import SearchBoatRequest
 from utils.enum.boat_statuses_values import BoatStatusesValues
 from utils.logger_service import LoggerService
@@ -46,6 +47,20 @@ class BoatRepository(BoatRepositoryMeta):
             )
         )
         return list(self._db.scalars(stmt))
+
+    """
+        Questo metodo mi consente di verificare se il medesimo utente ha prenotazioni
+        per il periodo richiesto. Come scelta di progettazione, voglio evitare che l'utente
+        possa prenotare due imbarcazioni per lo stesso periodo.
+        Torniamo True se ci sono conflitti, False altrimenti.
+    """
+    def check_customer_existing_bookings(self, customer_id: int, start_date: datetime, end_date: datetime) -> bool:
+        stmt = select(Booking).where(
+            Booking.customer_id == customer_id,
+            Booking.start_date < end_date,
+            Booking.end_date > start_date
+        )
+        return self._db.scalar(stmt) is not None
 
     def get_boat_to_book(self, booking_request: SearchBoatRequest, customer_id: int = None) -> Boat:
         """
