@@ -114,12 +114,6 @@ class BookingService(BookingServiceMeta):
             self._logger_service.logger.info(f"Stiamo cercando di modificare una prenotazione che non esiste.")
             raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
 
-
-        self._logger_service.logger.info(f"before check")
-        self._logger_service.logger.info(f"enum type {type(Roles.ADMIN.value)} {Roles.ADMIN.value}")
-        self._logger_service.logger.info(f"db type {type(customer.role)} {customer.role}")
-        self._logger_service.logger.info(f"check {customer.role == Roles.ADMIN.value}")
-
         """
             Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
             Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
@@ -131,6 +125,10 @@ class BookingService(BookingServiceMeta):
             raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
 
 
+        self._logger_service.logger.info(f"before check")
+        self._logger_service.logger.info(f"enum type {type(BookingStatuses.CONFIRMED.value)} {BookingStatuses.CONFIRMED.value}")
+        self._logger_service.logger.info(f"db type {type(reservation_to_edit.reservation_status)} {reservation_to_edit.reservation_status}")
+        self._logger_service.logger.info(f"check {reservation_to_edit.reservation_status == BookingStatuses.CONFIRMED.value}")
         """
             Controllo se lo stato è incompatibile con la modifica.
             Al momento prevedo che soltanto le prenotazioni confermate possono
