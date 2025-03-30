@@ -93,7 +93,7 @@ class BookingService(BookingServiceMeta):
         reservation = Booking(
             **reservation_data.model_dump(),
             reservation_code=uuid4().hex,
-            reservation_status=BookingStatuses.CONFIRMED,
+            reservation_status=BookingStatuses.CONFIRMED.value,
             total_price=total_amount,
             customer_id=int(customer.sub),
         )
@@ -127,14 +127,14 @@ class BookingService(BookingServiceMeta):
 
         self._logger_service.logger.info(f"before check")
         self._logger_service.logger.info(f"enum type {type(BookingStatuses.CONFIRMED.value)} {BookingStatuses.CONFIRMED.value}")
-        self._logger_service.logger.info(f"db type {type(reservation_to_edit.reservation_status)} {reservation_to_edit.reservation_status}")
+        self._logger_service.logger.info(f"db type {type(reservation_to_edit.reservation_status.value)} {reservation_to_edit.reservation_status.value}")
         self._logger_service.logger.info(f"check {reservation_to_edit.reservation_status == BookingStatuses.CONFIRMED.value}")
         """
             Controllo se lo stato è incompatibile con la modifica.
             Al momento prevedo che soltanto le prenotazioni confermate possono
             essere modificate.
         """
-        if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED.value:
+        if reservation_to_edit.reservation_status.value != BookingStatuses.CONFIRMED.value:
             raise AcquaLuxBaseException(message=Messages.ATTEMPT_TO_EDIT_INCOMPATIBLE_STATE.value, code=422)
 
 
