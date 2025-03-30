@@ -128,7 +128,7 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"before check")
         self._logger_service.logger.info(f"enum type {type(BookingStatuses.CONFIRMED.value)} {BookingStatuses.CONFIRMED.value}")
         self._logger_service.logger.info(f"db type {type(reservation_to_edit.reservation_status.value)} {reservation_to_edit.reservation_status.value}")
-        self._logger_service.logger.info(f"check {reservation_to_edit.reservation_status == BookingStatuses.CONFIRMED.value}")
+        self._logger_service.logger.info(f"check {str(reservation_to_edit.reservation_status.value) == str(BookingStatuses.CONFIRMED.value)}")
         """
             Controllo se lo stato è incompatibile con la modifica.
             Al momento prevedo che soltanto le prenotazioni confermate possono
