@@ -121,12 +121,12 @@ class BookingService(BookingServiceMeta):
         self._logger_service.logger.info(f"Tipo CONFIRMED.value: {type(BookingStatuses.CONFIRMED.value)}")
 
 
-        self._logger_service.logger.info(f"condizione: ${reservation_to_edit.customer_id != customer.sub and customer.role != Roles.ADMIN}")
-        self._logger_service.logger.info(f"condizione: ${reservation_to_edit.customer_id != customer.sub}")
-        self._logger_service.logger.info(f"condizione: ${reservation_to_edit.customer_id}")
-        self._logger_service.logger.info(f"condizione: ${customer.sub}")
-        self._logger_service.logger.info(f"condizione: ${customer.role != Roles.ADMIN}")
-        self._logger_service.logger.info(f"condizione: ${customer.role}")
+        self._logger_service.logger.info(f"condizione: {reservation_to_edit.customer_id != customer.sub and customer.role != Roles.ADMIN}")
+        self._logger_service.logger.info(f"condizione: {reservation_to_edit.customer_id != customer.sub}")
+        self._logger_service.logger.info(f"condizione: {reservation_to_edit.customer_id}")
+        self._logger_service.logger.info(f"condizione: {customer.sub}")
+        self._logger_service.logger.info(f"condizione: {customer.role != Roles.ADMIN}")
+        self._logger_service.logger.info(f"condizione: {customer.role}")
 
         """
             Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
