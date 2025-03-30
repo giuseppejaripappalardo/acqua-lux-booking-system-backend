@@ -123,6 +123,8 @@ class BookingService(BookingServiceMeta):
 
         self._logger_service.logger.info(f"condizione: ${reservation_to_edit.customer_id != customer.sub and customer.role != Roles.ADMIN}")
         self._logger_service.logger.info(f"condizione: ${reservation_to_edit.customer_id != customer.sub}")
+        self._logger_service.logger.info(f"condizione: ${reservation_to_edit.customer_id}")
+        self._logger_service.logger.info(f"condizione: ${customer.sub}")
         self._logger_service.logger.info(f"condizione: ${customer.role != Roles.ADMIN}")
         self._logger_service.logger.info(f"condizione: ${customer.role}")
 
