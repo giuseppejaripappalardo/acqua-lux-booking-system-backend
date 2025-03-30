@@ -121,7 +121,7 @@ class BookingService(BookingServiceMeta):
             essere modificate.
         """
         if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED.value:
-            raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
+            raise AcquaLuxBaseException(message=Messages.ATTEMPT_TO_EDIT_INCOMPATIBLE_STATE.value, code=422)
 
 
         """

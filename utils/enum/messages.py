@@ -20,3 +20,4 @@ class Messages(Enum):
     BOOKING_CUSTOMER_ONLY = "La prenotazione può essere effettuata solo dal cliente e non da altri utenti."
     BOOKING_MODIFICATION_NOT_ALLOWED = "Non è possibile modificare una prenotazione già iniziata o terminata."
     CUSTOMER_ALREADY_HAS_BOOKING = "Hai già una prenotazione attiva per lo stesso arco temporale. Non è possibile effettuare prenotazioni simultaneamente. Cambia le date e riprova."
+    ATTEMPT_TO_EDIT_INCOMPATIBLE_STATE = "Solo le prenotazioni con stato CONFIRMED possono essere modificate."
