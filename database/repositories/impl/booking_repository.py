@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from click.testing import Result
 from fastapi import Depends
 from sqlalchemy import select, delete, CursorResult, update
@@ -46,6 +48,20 @@ class BookingRepository(BookingRepositoryMeta):
 
         stmt_get = select(Booking).where(Booking.id == reservation_data.id)
         return self._db.scalar(stmt_get)
+
+    """
+        Questo metodo mi consente di verificare se il medesimo utente ha prenotazioni
+        per il periodo richiesto. Come scelta di progettazione, voglio evitare che l'utente
+        possa prenotare due imbarcazioni per lo stesso periodo.
+        Torniamo True se ci sono conflitti, False altrimenti.
+    """
+    def check_customer_existing_bookings(self, customer_id: int, start_date: datetime, end_date: datetime) -> bool:
+        stmt = select(Booking).where(
+            Booking.customer_id == customer_id,
+            Booking.start_date < end_date,
+            Booking.end_date > start_date
+        )
+        return self._db.scalar(stmt) is not None
 
 
     def delete_booking(self, booking: Booking) -> int:
