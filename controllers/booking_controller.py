@@ -41,11 +41,11 @@ async def view(request: Request, booking_id: int, booking_service: BookingServic
 
 @router.post(
     "/add",
-    response_model=BaseResponse[BookingResponse],
+    response_model=BaseResponse[BookingWithBoatResponse],
     summary="Questo endpoint permette di creare una nuova prenotazione nel sistema.",
     description="Accetta i dati della prenotazione e registra una nuova prenotazione nel sistema. Restituisce i dettagli della prenotazione creata con relativo ID di conferma."
 )
-async def make_reservation(request: Request, reservation_data: CustomerBookingRequest, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingResponse]:
+async def make_reservation(request: Request, reservation_data: CustomerBookingRequest, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingWithBoatResponse]:
     logged_user = AuthChecker.get_logged_in_user(request)
     return success_response(booking_service.make_reservation(reservation_data, logged_user))
 
