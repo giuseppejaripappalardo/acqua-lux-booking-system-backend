@@ -192,49 +192,26 @@ class BookingService(BookingServiceMeta):
                 f"L'imbarcazione che è stata scelta per la modifica non è disponibile. Non è possibile procedere con questa operazione.")
             raise BoatAlreadyBookedException(Messages.BOAT_ALREADY_BOOKED.value)
 
+
         """
-            Sul costo della prenotazione incidono le date, quindi dobbiamo valutare se anche queste sono cambiate, per effettuare
-            il ricalcolo.
+            Prendiamo il costo totale della prenotazione da modificare.
         """
-        dates_are_changed = (reservation_data.start_date != reservation_to_edit.start_date or
-                             reservation_data.end_date != reservation_to_edit.end_date)
+        old_total = reservation_to_edit.total_price
 
-        # Di base setto qui il vecchio total amount. Se cambia verrà semplicemente sovrascritto e salvato.
-        total_amount: Decimal = reservation_to_edit.total_price
+        """
+            Calcoliamo qui il nuovo costo totale della prenotazione.
+            Prendiamo la data di fine - la data di inizio e la dividiamo per 3600 per ottenere il numero di ore.
+            Infine basterà moltiplicare il numero di ore per il costo orario della nuova imbarcazione.
+        """
+        diff_hours = math.ceil((reservation_data.end_date - reservation_data.start_date).total_seconds() / 3600)
+        new_price_per_hour = get_boat_to_book.price_per_hour
+        new_total = new_price_per_hour * Decimal(diff_hours)
 
-        price_difference: Decimal = Decimal(0)
-        refund = False
-
-        if boat_is_changed or dates_are_changed:
-            """
-                Dobbiamo valutare a questo punto le differenze di costi tra l'imbarcazione precedente e la nuova.
-                Consideriamo anche che essendo un project work va fuori dagli scopi previsti. Quindi teniamo la logica
-                di calcolo qui. ma di fatto procederemo sempre con la prenotazione. Lato frontend verrà mostrata la differenza
-                del costo e simulato il pagamento.
-            """
-            new_boat_price_per_hour: Decimal = get_boat_to_book.price_per_hour
-            diff_hours = math.ceil((edited_reservation.end_date - edited_reservation.start_date).total_seconds() / 3600)
-            total_amount: Decimal = new_boat_price_per_hour * Decimal(diff_hours)
-            price_difference: Decimal = total_amount - reservation_to_edit.total_price
-
-            self._logger_service.logger.info(f"Le date o l'imbarcazione sono state modificate e ora c'è una differenza")
-            self._logger_service.logger.info(f"Date cambiata: {dates_are_changed} Boat cambiata: {boat_is_changed}")
-
-            if price_difference > 0:
-                self._logger_service.logger.info(f"C'è una differenza di prezzo {price_difference}")
-                self._logger_service.logger.info(
-                    f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
-            elif price_difference < 0:
-                refund = True
-                self._logger_service.logger.info(
-                    f"Significa che dobbiamo fare un rimborso, perché il nuovo charter costa meno del precedente")
-                self._logger_service.logger.info(
-                    f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
-            else:
-                self._logger_service.logger.info(
-                    f"Non ci sono differenze di prezzo, quindi non dobbiamo fare nessun rimborso")
-        else:
-            self._logger_service.logger.info(f"Non ci sono modifiche")
+        """
+            A questo punto possiamo calcolare la differenza.
+        """
+        price_difference = new_total - old_total
+        refund = price_difference < 0
 
         """
             Se siamo arrivati fin qui abbiamo superato tutti i controlli. Significa che possiamo costruire il modello
@@ -246,7 +223,7 @@ class BookingService(BookingServiceMeta):
             id=reservation_data.booking_id,
             reservation_code=reservation_to_edit.reservation_code,
             reservation_status=BookingStatuses.CONFIRMED,
-            total_price=total_amount,
+            total_price=new_total,
             price_difference=price_difference,
             requires_refund=refund
         )
