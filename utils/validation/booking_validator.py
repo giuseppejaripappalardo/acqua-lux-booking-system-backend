@@ -38,7 +38,6 @@ def booking_validator(booking_request: SearchBoatRequest):
     """
 
     current_date = datetime.now(pytz.utc)
-
     logger_service = LoggerService().logger
     default_rome_timezone = pytz.timezone("Europe/Rome")
     """
