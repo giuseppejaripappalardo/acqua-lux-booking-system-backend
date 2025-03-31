@@ -18,6 +18,7 @@ from exceptions.generic.generic_not_found_exception import GenericNotFoundExcept
 from models.object.token_payload import TokenPayload
 from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
 from services.meta.booking_service_meta import BookingServiceMeta
+from utils.datetime_provider import DateTimeProvider
 from utils.enum.booking_statuses import BookingStatuses
 from utils.enum.messages import Messages
 from utils.enum.roles import Roles
@@ -57,6 +58,13 @@ class BookingService(BookingServiceMeta):
             Se la validazione non viene superata vengono lanciate delle eccezioni
         """
         booking_validator(reservation_data)
+
+        """
+            Normalizzo le date in UTC anche qui per chiarezza,
+            anche se il validator già le ha convertite.
+        """
+        reservation_data.start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_data.start_date)
+        reservation_data.end_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_data.end_date)
 
         self._logger_service.logger.info(f"before check")
 
@@ -146,12 +154,7 @@ class BookingService(BookingServiceMeta):
             Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
         """
         current_date = datetime.now(pytz.utc)
-        timezone = pytz.timezone("Europe/Rome")
-        start_date = reservation_to_edit.start_date
-
-        if start_date.tzinfo is None:
-            start_date = timezone.localize(start_date)
-            start_date = start_date.astimezone(pytz.utc)
+        start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_to_edit.start_date)
 
         self._logger_service.logger.info(f"START DATE ORIGINALE: {reservation_to_edit.start_date} - tz: {reservation_to_edit.start_date.tzinfo}")
         self._logger_service.logger.info(f"START DATE UTC: {start_date}")
@@ -259,12 +262,7 @@ class BookingService(BookingServiceMeta):
             Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
         """
         current_date = datetime.now(pytz.utc)
-        timezone = pytz.timezone("Europe/Rome")
-        start_date = booking_to_delete.start_date
-
-        if start_date.tzinfo is None:
-            start_date = timezone.localize(start_date)
-            start_date = start_date.astimezone(pytz.utc)
+        start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_to_delete.start_date)
 
         if start_date <= current_date:
             raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)

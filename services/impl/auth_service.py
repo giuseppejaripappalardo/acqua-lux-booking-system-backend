@@ -7,16 +7,15 @@ from fastapi import Depends, Response, Request
 from database.entities.user import User
 from database.repositories.impl.user_repository import UserRepository
 from exceptions.auth.auth_exception import AuthException
-from exceptions.base_exception import AcquaLuxBaseException
 from models.object.token_payload import TokenPayload
 from models.request.auth.auth_request import LoginRequest
 from models.response.auth.auth_response import TokenResponse
 from models.response.user.user_response import UserResponse
 from services.meta.auth_service_meta import AuthServiceMeta
 from utils.enum.messages import Messages
+from utils.logger_service import LoggerService
 from utils.security.bcrypt_hash_password import PassowrdHasher
 from utils.security.jwt_utils import JwtUtils
-from utils.logger_service import LoggerService
 
 
 class AuthService(AuthServiceMeta):
@@ -39,7 +38,7 @@ class AuthService(AuthServiceMeta):
 
         payload: TokenPayload = TokenPayload(
             sub=str(user.id),
-            role=user.role.name,
+            role=user.role.name.value,
             exp=datetime.now(pytz.utc) + timedelta(minutes=int(self.ACCESS_TOKEN_EXPIRE_MINUTES))
         )
 

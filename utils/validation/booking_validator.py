@@ -5,6 +5,7 @@ import pytz
 from exceptions.dates.InvalidDatetimeException import InvalidDatetimeException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
 from models.request.booking.search_boat_request import SearchBoatRequest
+from utils.datetime_provider import DateTimeProvider
 from utils.enum.messages import Messages
 from utils.logger_service import LoggerService
 
@@ -39,28 +40,12 @@ def booking_validator(booking_request: SearchBoatRequest):
 
     current_date = datetime.now(pytz.utc)
     logger_service = LoggerService().logger
-    default_rome_timezone = pytz.timezone("Europe/Rome")
-    """
-        Se il timezone della start date in input non è definito
-        lo settiamo noi a Europe/Rome come definito di default per questo project work.
-    """
-    if booking_request.start_date.tzinfo is None:
-        booking_request.start_date = default_rome_timezone.localize(booking_request.start_date)
 
     """
-        Se il timezone della end date in input non è definito
-        lo settiamo noi a Europe/Rome come definito di default per questo project work.
+        Convertiamo le date in UTC, assumendo che arriveranno sempre con timezone Europe/Rome.
     """
-    if booking_request.end_date.tzinfo is None:
-        booking_request.end_date = default_rome_timezone.localize(booking_request.end_date)
-
-    """
-        In questo stage siamo sicuri di avere un timezone coerente per start date ed end date.
-        Quindi possiamo convertire tutte le date in UTC in maniera confidente, cosi da garantire
-        uniformità. Considerato che tutte le date salvate a DB sono in formato UTC.
-    """
-    booking_request.start_date = booking_request.start_date.astimezone(pytz.utc)
-    booking_request.end_date = booking_request.end_date.astimezone(pytz.utc)
+    booking_request.start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.start_date)
+    booking_request.end_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.end_date)
 
     logger_service.info(f"start date: {booking_request.start_date}")
     logger_service.info(f"end date: {booking_request.end_date}")
