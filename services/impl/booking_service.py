@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import pytz
 from fastapi import Depends
-from sqlalchemy import modifier
 
 from database.entities.booking import Booking
 from database.repositories.impl.boat_repository import BoatRepository
@@ -17,7 +16,7 @@ from exceptions.base_exception import AcquaLuxBaseException
 from exceptions.booking.boat_already_booked_exception import BoatAlreadyBookedException
 from exceptions.generic.generic_not_found_exception import GenericNotFoundException
 from models.object.token_payload import TokenPayload
-from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest, GetBookingByIdRequest
+from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
 from services.meta.booking_service_meta import BookingServiceMeta
 from utils.enum.booking_statuses import BookingStatuses
 from utils.enum.messages import Messages
@@ -153,6 +152,10 @@ class BookingService(BookingServiceMeta):
         if start_date.tzinfo is None:
             start_date = timezone.localize(start_date)
             start_date = start_date.astimezone(pytz.utc)
+
+        self._logger_service.logger.info(f"START DATE ORIGINALE: {reservation_to_edit.start_date} - tz: {reservation_to_edit.start_date.tzinfo}")
+        self._logger_service.logger.info(f"START DATE UTC: {start_date}")
+        self._logger_service.logger.info(f"CURRENT UTC: {current_date}")
 
         if start_date <= current_date:
             raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)
