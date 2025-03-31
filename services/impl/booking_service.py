@@ -222,17 +222,6 @@ class BookingService(BookingServiceMeta):
             per persisterlo nel database. Manteniamo il reservation_code visto che comunque si tratta di una modifica
             di una prenotazione esistente.
         """
-        # reservation = Booking(
-        #     **edited_reservation.model_dump(),
-        #     id=reservation_data.booking_id,
-        #     reservation_code=reservation_to_edit.reservation_code,
-        #     reservation_status=BookingStatuses.CONFIRMED,
-        #     total_price=new_total,
-        #     price_difference=price_difference,
-        #     requires_refund=refund,
-        #     modified_at=current_timestamp
-        # )
-
         reservation_to_edit.seat = edited_reservation.seat
         reservation_to_edit.start_date = edited_reservation.start_date
         reservation_to_edit.end_date = edited_reservation.end_date
@@ -277,6 +266,8 @@ class BookingService(BookingServiceMeta):
         if start_date <= current_date:
             raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)
 
+        booking_to_delete.reservation_status = BookingStatuses.CANCELLED
+        booking_to_delete.modified_at = current_date
         return self._booking_repository.delete_booking(booking_to_delete)
 
     def get_by_id(self, booking_id: int, customer: TokenPayload) -> Booking:

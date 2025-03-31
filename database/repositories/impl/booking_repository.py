@@ -24,7 +24,6 @@ class BookingRepository(BookingRepositoryMeta):
         stmt = select(Booking).where(Booking.customer_id == customer_id)
         return list(self._db.scalars(stmt))
 
-
     def make_reservation(self, reservation_data: Booking) -> Booking:
         self._db.add(reservation_data)
         self._db.commit()
@@ -42,6 +41,7 @@ class BookingRepository(BookingRepositoryMeta):
         possa prenotare due imbarcazioni per lo stesso periodo.
         Torniamo True se ci sono conflitti, False altrimenti.
     """
+
     def check_customer_existing_bookings(self, customer_id: int, start_date: datetime, end_date: datetime) -> bool:
         stmt = select(Booking).where(
             Booking.customer_id == customer_id,
@@ -51,15 +51,10 @@ class BookingRepository(BookingRepositoryMeta):
         )
         return self._db.scalar(stmt) is not None
 
-
     def delete_booking(self, booking: Booking) -> Booking:
-        stmt = update(Booking).where(Booking.id == booking.id).values(reservation_status=BookingStatuses.CANCELLED)
-        self._db.execute(stmt)
         self._db.commit()
-        self._db.flush()
-
-        stmt_get = select(Booking).where(Booking.id == booking.id)
-        return self._db.scalar(stmt_get)
+        self._db.merge(booking)
+        return booking
 
     def get_booking(self, booking_id: int) -> Booking | None:
         stmt = select(Booking).where(Booking.id == booking_id)

@@ -37,6 +37,8 @@ def booking_validator(booking_request: SearchBoatRequest):
             IntegrityDatabaseException: Se il numero di posti richiesto è inferiore a 1.
     """
 
+    current_date = datetime.now(pytz.utc)
+
     logger_service = LoggerService().logger
     default_rome_timezone = pytz.timezone("Europe/Rome")
     """
@@ -71,7 +73,7 @@ def booking_validator(booking_request: SearchBoatRequest):
     if booking_request.start_date >= booking_request.end_date:
         raise InvalidDatetimeException(message=Messages.START_DATE_GREATHER_OR_EQUAL_THAN.value)
 
-    current_date = datetime.now(pytz.utc)
+
     if booking_request.start_date < current_date:
         raise InvalidDatetimeException(message=Messages.START_DATE_LESS_THAN_CURRENT.value)
 
