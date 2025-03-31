@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import pytz
 from fastapi import Depends
+from sqlalchemy import modifier
 
 from database.entities.booking import Booking
 from database.repositories.impl.boat_repository import BoatRepository
@@ -90,13 +91,15 @@ class BookingService(BookingServiceMeta):
         price_per_hour: Decimal = get_boat_to_book.price_per_hour
         diff_hours = math.ceil((reservation_data.end_date - reservation_data.start_date).total_seconds() / 3600)
         total_amount: Decimal = price_per_hour * Decimal(diff_hours)
-
+        current_timestamp = datetime.now(pytz.utc)
         reservation = Booking(
             **reservation_data.model_dump(),
             reservation_code=uuid4().hex,
             reservation_status=BookingStatuses.CONFIRMED,
             total_price=total_amount,
             customer_id=int(customer.sub),
+            created_at=current_timestamp,
+            modified_at=current_timestamp
         )
 
         self._logger_service.logger.info(f"customer {customer.sub}")
@@ -192,7 +195,6 @@ class BookingService(BookingServiceMeta):
                 f"L'imbarcazione che è stata scelta per la modifica non è disponibile. Non è possibile procedere con questa operazione.")
             raise BoatAlreadyBookedException(Messages.BOAT_ALREADY_BOOKED.value)
 
-
         """
             Prendiamo il costo totale della prenotazione da modificare.
         """
@@ -213,6 +215,8 @@ class BookingService(BookingServiceMeta):
         price_difference = new_total - old_total
         refund = price_difference < 0
 
+        current_timestamp = datetime.now(pytz.utc)
+
         """
             Se siamo arrivati fin qui abbiamo superato tutti i controlli. Significa che possiamo costruire il modello
             per persisterlo nel database. Manteniamo il reservation_code visto che comunque si tratta di una modifica
@@ -225,7 +229,8 @@ class BookingService(BookingServiceMeta):
             reservation_status=BookingStatuses.CONFIRMED,
             total_price=new_total,
             price_difference=price_difference,
-            requires_refund=refund
+            requires_refund=refund,
+            modified_at=current_timestamp
         )
 
         return self._booking_repository.edit_reservation(reservation)
@@ -240,15 +245,29 @@ class BookingService(BookingServiceMeta):
             di cancellarla. In caso contrario lanciamo una eccezione. Solo l'utente con ruolo
             ADMIN potrà cancellare qualsiasi prenotazione.
         """
-        if booking_to_delete.customer_id != logged_user.sub and logged_user.role != Roles.ADMIN.value:
+        if int(booking_to_delete.customer_id) != int(logged_user.sub) and logged_user.role != Roles.ADMIN.value:
+            self._logger_service.logger.info(
+                "Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
             raise AcquaLuxBaseException(message=Messages.DELETE_OPERATION_NOT_ALLOWED.value, code=403)
 
-        deleted = self._booking_repository.delete_booking(booking_to_delete)
+        """
+            A questo punto un aspetto molto importante da verificare è quello di capire se si sta cercando di modificare una prenotazione già in corso.
+            Di base per semplificare le logiche, assumo che una prenotazione in corso non può più essere modificata.
+            Quindi se start_date è maggiore della current date allora non possiamo consentire la modifica. Vuol dire che il charter è già in corso.
+            Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
+        """
+        current_date = datetime.now(pytz.utc)
+        timezone = pytz.timezone("Europe/Rome")
+        start_date = booking_to_delete.start_date
 
-        if deleted == 0:
-            raise GenericNotFoundException(message=Messages.NO_BOOKINGS_DELETED.value, code=404)
+        if start_date.tzinfo is None:
+            start_date = timezone.localize(start_date)
+            start_date = start_date.astimezone(pytz.utc)
 
-        return booking_to_delete
+        if start_date <= current_date:
+            raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)
+
+        return self._booking_repository.delete_booking(booking_to_delete)
 
     def get_by_id(self, booking_id: int, customer: TokenPayload) -> Booking:
         booking: Booking = self._booking_repository.get_booking(booking_id)

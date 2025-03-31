@@ -63,8 +63,8 @@ async def edit_reservation(request: Request, edit_reservation_data: EditBookingR
 @router.delete(
     "/delete",
     response_model=BaseResponse[BookingResponse],
-    summary="Questo endpoint permette di cancellare una prenotazione esistente nel sistema.",
-    description="Elimina una prenotazione dal sistema utilizzando l'ID della prenotazione specificato. Restituisce l'esito dell'operazione di cancellazione."
+    summary="Questo endpoint permette di modificare lo stato di una prenotazione esistente nel sistema in CANCELLED.",
+    description="Setta lo stato di una prenotazione esistente in CANCELLED."
 )
 async def delete_reservation(request: Request, booking_request: BookingDeleteRequest,booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingResponse]:
     logged_user = AuthChecker.get_logged_in_user(request)

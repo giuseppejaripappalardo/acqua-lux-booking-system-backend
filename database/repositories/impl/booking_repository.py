@@ -1,14 +1,12 @@
 from datetime import datetime
 
-from click.testing import Result
 from fastapi import Depends
-from sqlalchemy import select, delete, CursorResult, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from config.database import Database
 from database.entities.booking import Booking
 from database.repositories.meta.booking_repository_meta import BookingRepositoryMeta
-from exceptions.generic.generic_not_found_exception import GenericNotFoundException
 from utils.enum.booking_statuses import BookingStatuses
 
 
@@ -61,16 +59,19 @@ class BookingRepository(BookingRepositoryMeta):
             Booking.customer_id == customer_id,
             Booking.start_date < end_date,
             Booking.end_date > start_date,
-            Booking.reservation_status == BookingStatuses.CONFIRMED.value
+            Booking.reservation_status == BookingStatuses.CONFIRMED
         )
         return self._db.scalar(stmt) is not None
 
 
-    def delete_booking(self, booking: Booking) -> int:
-        stmt = delete(Booking).where(Booking.id == booking.id)
-        result: CursorResult = self._db.execute(stmt)
+    def delete_booking(self, booking: Booking) -> Booking:
+        stmt = update(Booking).where(Booking.id == booking.id).values(reservation_status=BookingStatuses.CANCELLED)
+        self._db.execute(stmt)
         self._db.commit()
-        return result.rowcount
+        self._db.flush()
+
+        stmt_get = select(Booking).where(Booking.id == booking.id)
+        return self._db.scalar(stmt_get)
 
     def get_booking(self, booking_id: int) -> Booking | None:
         stmt = select(Booking).where(Booking.id == booking_id)

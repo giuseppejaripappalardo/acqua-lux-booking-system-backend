@@ -1,3 +1,6 @@
+from datetime import datetime
+
+import pytz
 from fastapi import Depends
 
 from database.entities.user import User
@@ -7,8 +10,8 @@ from exceptions.users.user_already_exists import UserAlreadyExists
 from models.request.user.user_request import UserRequest
 from models.response.user.user_response import UserResponse
 from services.meta.user_service_meta import UserServiceMeta
-from utils.security.bcrypt_hash_password import PassowrdHasher
 from utils.logger_service import LoggerService
+from utils.security.bcrypt_hash_password import PassowrdHasher
 
 
 class UserService(UserServiceMeta):
@@ -25,12 +28,15 @@ class UserService(UserServiceMeta):
             Metodo preposto del service per la creazione degli utenti.
         """
         hashed_password = PassowrdHasher().bcrypt_hash_password(user.password)
+        current_timestamp = datetime.now(pytz.utc)
         new_user = User(
             username=user.username,
             password=hashed_password,
             firstname=user.firstname,
             lastname=user.lastname,
-            role_id=user.role_id
+            role_id=user.role_id,
+            created_at=current_timestamp,
+            modified_at=current_timestamp
         )
 
         user_exist: User | None = self._user_repository.get_by_username(user.username)

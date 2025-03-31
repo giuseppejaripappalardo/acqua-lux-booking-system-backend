@@ -13,5 +13,5 @@ class Role(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True, autoincrement=True, nullable=False)
     name: Mapped[Roles] = mapped_column( Enum(Roles, create_constraint=True), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)
-    modified_at: Mapped[datetime] =  mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(), onupdate=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    modified_at: Mapped[datetime] =  mapped_column(DateTime, onupdate=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)

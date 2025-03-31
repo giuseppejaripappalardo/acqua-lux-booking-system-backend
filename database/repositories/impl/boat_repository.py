@@ -36,11 +36,11 @@ class BoatRepository(BoatRepositoryMeta):
                     Booking.boat_id == Boat.id,
                     Booking.start_date < booking_request.end_date,
                     Booking.end_date > booking_request.start_date,
-                    Booking.reservation_status == BookingStatuses.CONFIRMED.value
+                    Booking.reservation_status == BookingStatuses.CONFIRMED
                 )
             )
             .where(
-                BoatStatuses.name == BoatStatusesValues.AVAILABLE.value,
+                BoatStatuses.name == BoatStatusesValues.AVAILABLE,
                 Boat.seat >= booking_request.seat,
                 # Nessun booking in conflitto
                 Booking.id.is_(None)
@@ -57,7 +57,7 @@ class BoatRepository(BoatRepositoryMeta):
             Booking.boat_id == Boat.id,
             Booking.start_date < booking_request.end_date,
             Booking.end_date > booking_request.start_date,
-            Booking.reservation_status == BookingStatuses.CONFIRMED.value
+            Booking.reservation_status == BookingStatuses.CONFIRMED
         )
 
         """
@@ -84,7 +84,7 @@ class BoatRepository(BoatRepositoryMeta):
                 booking_overlap_condition
             )
             .where(
-                BoatStatuses.name == BoatStatusesValues.AVAILABLE.value,
+                BoatStatuses.name == BoatStatusesValues.AVAILABLE,
                 Boat.seat >= booking_request.seat,
                 Boat.id == booking_request.boat_id,
                 Booking.id.is_(None)

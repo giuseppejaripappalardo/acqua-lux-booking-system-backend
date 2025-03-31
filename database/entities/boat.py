@@ -25,10 +25,9 @@ class Boat(Base):
     boat_status_id: Mapped[int] = mapped_column(Integer, ForeignKey("boat_statuses.id"), nullable=False, index=True)
     boat_status: Mapped["BoatStatuses"] = relationship("BoatStatuses", lazy="joined")
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="boat", lazy="select")
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(),
+    created_at: Mapped[datetime] = mapped_column(DateTime,
                                                  nullable=False)
-    modified_at: Mapped[datetime] = mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(),
-                                                  onupdate=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)
+    modified_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     @hybridproperty
     def is_available(self):

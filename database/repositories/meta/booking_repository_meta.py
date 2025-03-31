@@ -28,7 +28,7 @@ class BookingRepositoryMeta(ABC):
         pass
 
     @abstractmethod
-    def delete_booking(self, booking: Booking) -> int:
+    def delete_booking(self, booking: Booking) -> Booking:
         pass
 
     @abstractmethod

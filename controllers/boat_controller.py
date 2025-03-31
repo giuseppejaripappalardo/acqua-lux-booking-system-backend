@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, Request
 from models.request.booking.search_boat_request import SearchBoatRequest
 from models.response.base_response import BaseResponse
 from models.response.boat.boat_response import BoatResponse
-from models.response.boat.boat_with_bookings_response import BoatWithBookingsResponse
 from services.impl.boat_service import BoatService
 from services.meta.boat_service_meta import BoatServiceMeta
 from utils.format_response import success_response

@@ -19,8 +19,6 @@ class User(Base):
     firstname: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
     lastname: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
     role_id: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"), index=True, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(),
-                                                 nullable=False)
-    modified_at: Mapped[datetime] = mapped_column(DateTime, server_default=DateTimeProvider.get_timestamp_utc_sql(),
-                                                  onupdate=DateTimeProvider.get_timestamp_utc_sql(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    modified_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     role: Mapped["Role"] = relationship("Role", lazy="joined")

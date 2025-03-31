@@ -22,11 +22,7 @@ class BoatService(BoatServiceMeta):
         return self._boat_repository.find_all()
 
     def find_available_boats_for_booking(self, booking_request: SearchBoatRequest) -> list[Boat]:
-
         # Metodo preposto alla validazione
         # Consultare l'implementazione per avere tutti i dettagli.
         booking_validator(booking_request)
-
-        # TODO GESTIRE CASO IN CUI IL MEDESIMO UTENTE PROVA A PRENOTARE UNA IMBARCAZIONE IN UN RANGE TEMPORALE CHE OVERLAPPA
-
         return self._boat_repository.find_available_boats_for_booking(booking_request)
