@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 
 from database.entities.booking import Booking
 from models.object.token_payload import TokenPayload
-from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
+from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest, GetBookingByIdRequest
 from models.response.booking.booking_response import BookingResponse
 
 
@@ -19,6 +19,10 @@ class BookingServiceMeta(ABC):
 
     @abstractmethod
     def make_reservation(self, reservation_data: CustomerBookingRequest, customer: TokenPayload) -> Booking:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, booking_id: int, customer: TokenPayload) -> Booking:
         pass
 
     @abstractmethod

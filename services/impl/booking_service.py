@@ -9,7 +9,6 @@ from fastapi import Depends
 from database.entities.booking import Booking
 from database.repositories.impl.boat_repository import BoatRepository
 from database.repositories.impl.booking_repository import BookingRepository
-from database.repositories.impl.user_repository import UserRepository
 from database.repositories.meta.boat_repository_meta import BoatRepositoryMeta
 from database.repositories.meta.booking_repository_meta import BookingRepositoryMeta
 from database.repositories.meta.user_repository_meta import UserRepositoryMeta
@@ -17,7 +16,7 @@ from exceptions.base_exception import AcquaLuxBaseException
 from exceptions.booking.boat_already_booked_exception import BoatAlreadyBookedException
 from exceptions.generic.generic_not_found_exception import GenericNotFoundException
 from models.object.token_payload import TokenPayload
-from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
+from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest, GetBookingByIdRequest
 from services.meta.booking_service_meta import BookingServiceMeta
 from utils.enum.booking_statuses import BookingStatuses
 from utils.enum.messages import Messages
@@ -81,7 +80,9 @@ class BookingService(BookingServiceMeta):
             Controllo se l'utente ha già prenotazioni nello stesso range temporale per cui intende prenotare.
             In caso positivo lancio una eccezione. Per scelta di progettazione non consento prenotazioni simultanee.
         """
-        check_customer_existing_booking = self._booking_repository.check_customer_existing_bookings(int(customer.sub), reservation_data.start_date, reservation_data.end_date)
+        check_customer_existing_booking = self._booking_repository.check_customer_existing_bookings(int(customer.sub),
+                                                                                                    reservation_data.start_date,
+                                                                                                    reservation_data.end_date)
         if check_customer_existing_booking:
             self._logger_service.logger.info(f"Cliente {customer.sub} ha già una prenotazione per questo periodo")
             raise BoatAlreadyBookedException(Messages.CUSTOMER_ALREADY_HAS_BOOKING.value)
@@ -114,7 +115,6 @@ class BookingService(BookingServiceMeta):
             self._logger_service.logger.info(f"Stiamo cercando di modificare una prenotazione che non esiste.")
             raise GenericNotFoundException(message=Messages.BOOKING_TO_EDIT_NOT_FOUND.value, code=404)
 
-
         """
             Ci assicuriamo qui che il tentativo di modifica prenotazione viene fatto dall'utente che ha effettuato la prenotazione.
             Se l'id dell'utente autenticato non coincide con l'id del customer significa che stiamo
@@ -125,7 +125,8 @@ class BookingService(BookingServiceMeta):
             Roles.ADMIN.value per confrontare due stringhe.
         """
         if int(reservation_to_edit.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN.value:
-            self._logger_service.logger.info("Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
+            self._logger_service.logger.info(
+                "Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
             raise AcquaLuxBaseException(message=Messages.BOOKING_CUSTOMER_ONLY.value, code=403)
 
         """
@@ -134,9 +135,7 @@ class BookingService(BookingServiceMeta):
             essere modificate.
         """
         if reservation_to_edit.reservation_status != BookingStatuses.CONFIRMED:
-            raise AcquaLuxBaseException(message=Messages.ATTEMPT_TO_EDIT_INCOMPATIBLE_STATE.value, code=422)
-
-
+            raise AcquaLuxBaseException(message=Messages.BOOKING_EDIT_INCOMPATIBLE_STATE.value, code=422)
 
         """
             A questo punto un aspetto molto importante da verificare è quello di capire se si sta cercando di modificare una prenotazione già in corso.
@@ -170,7 +169,7 @@ class BookingService(BookingServiceMeta):
         edited_reservation = CustomerBookingRequest(
             start_date=reservation_data.start_date,
             end_date=reservation_data.end_date,
-            boat_id= reservation_data.boat_id if boat_is_changed else reservation_to_edit.boat_id,
+            boat_id=reservation_data.boat_id if boat_is_changed else reservation_to_edit.boat_id,
             payment_method=reservation_to_edit.payment_method,
             notes=reservation_data.notes,
             seat=reservation_data.seat,
@@ -189,7 +188,8 @@ class BookingService(BookingServiceMeta):
         get_boat_to_book = self._boat_repository.get_boat_to_book(edited_reservation, int(customer.sub))
 
         if get_boat_to_book is None:
-            self._logger_service.logger.info(f"L'imbarcazione che è stata scelta per la modifica non è disponibile. Non è possibile procedere con questa operazione.")
+            self._logger_service.logger.info(
+                f"L'imbarcazione che è stata scelta per la modifica non è disponibile. Non è possibile procedere con questa operazione.")
             raise BoatAlreadyBookedException(Messages.BOAT_ALREADY_BOOKED.value)
 
         """
@@ -222,13 +222,17 @@ class BookingService(BookingServiceMeta):
 
             if price_difference > 0:
                 self._logger_service.logger.info(f"C'è una differenza di prezzo {price_difference}")
-                self._logger_service.logger.info(f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
+                self._logger_service.logger.info(
+                    f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
             elif price_difference < 0:
                 refund = True
-                self._logger_service.logger.info(f"Significa che dobbiamo fare un rimborso, perché il nuovo charter costa meno del precedente")
-                self._logger_service.logger.info(f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
+                self._logger_service.logger.info(
+                    f"Significa che dobbiamo fare un rimborso, perché il nuovo charter costa meno del precedente")
+                self._logger_service.logger.info(
+                    f"Old total: {reservation_to_edit.total_price} New total: {total_amount}")
             else:
-                self._logger_service.logger.info(f"Non ci sono differenze di prezzo, quindi non dobbiamo fare nessun rimborso")
+                self._logger_service.logger.info(
+                    f"Non ci sono differenze di prezzo, quindi non dobbiamo fare nessun rimborso")
         else:
             self._logger_service.logger.info(f"Non ci sono modifiche")
 
@@ -259,7 +263,7 @@ class BookingService(BookingServiceMeta):
             di cancellarla. In caso contrario lanciamo una eccezione. Solo l'utente con ruolo
             ADMIN potrà cancellare qualsiasi prenotazione.
         """
-        if  booking_to_delete.customer_id != logged_user.sub and logged_user.role != Roles.ADMIN.value:
+        if booking_to_delete.customer_id != logged_user.sub and logged_user.role != Roles.ADMIN.value:
             raise AcquaLuxBaseException(message=Messages.DELETE_OPERATION_NOT_ALLOWED.value, code=403)
 
         deleted = self._booking_repository.delete_booking(booking_to_delete)
@@ -268,3 +272,17 @@ class BookingService(BookingServiceMeta):
             raise GenericNotFoundException(message=Messages.NO_BOOKINGS_DELETED.value, code=404)
 
         return booking_to_delete
+
+    def get_by_id(self, booking_id: int, customer: TokenPayload) -> Booking:
+        booking: Booking = self._booking_repository.get_booking(booking_id)
+
+        if int(booking.customer_id) != int(customer.sub) and customer.role != Roles.ADMIN.value:
+            raise AcquaLuxBaseException(message=Messages.GET_BOOKING_CUSTOMER_ONLY.value, code=403)
+
+        if booking is None:
+            raise GenericNotFoundException(message=Messages.NOT_FOUND.value, code=404)
+
+        if booking.reservation_status != BookingStatuses.CONFIRMED:
+            raise AcquaLuxBaseException(message=Messages.BOOKING_EDIT_INCOMPATIBLE_STATE.value, code=422)
+
+        return booking

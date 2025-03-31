@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, Request
 
 from models.object.token_payload import TokenPayload
 from models.request.booking.booking_delete_request import BookingDeleteRequest
-from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
+from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest, GetBookingByIdRequest
 from models.response.base_response import BaseResponse
 from models.response.booking.booking_response import BookingResponse
 from models.response.booking.booking_with_boat_response import BookingWithBoatResponse
 from services.impl.booking_service import BookingService
 from services.meta.booking_service_meta import BookingServiceMeta
 from utils.format_response import success_response
+from utils.logger_service import LoggerService
 from utils.security.auth_checker import AuthChecker
 
 router = APIRouter()
@@ -23,6 +24,19 @@ router = APIRouter()
 async def booking_list(request: Request, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[list[BookingWithBoatResponse]]:
     logged_user: TokenPayload = AuthChecker.get_logged_in_user(request)
     return success_response(booking_service.find_all(logged_user))
+
+
+@router.get(
+    "/view",
+    response_model=BaseResponse[BookingWithBoatResponse],
+    summary="Restituisce i dettagli della prenotazione specificata.",
+    description="Recupera e restituisce tramite id una prenotazione registrata a sistema."
+)
+async def view(request: Request, booking_id: int, booking_service: BookingServiceMeta = Depends(BookingService)) -> BaseResponse[BookingWithBoatResponse]:
+    logger = LoggerService().logger
+    logger.info(f"Request to view booking with id: {booking_id}")
+    logged_user: TokenPayload = AuthChecker.get_logged_in_user(request)
+    return success_response(booking_service.get_by_id(booking_id, logged_user))
 
 
 @router.post(
