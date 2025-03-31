@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.entities.base import Base
 from utils.enum.booking_statuses import BookingStatuses
-from utils.datetime_provider import DateTimeProvider
 from utils.enum.payment_methods import PaymentMethods
 
 

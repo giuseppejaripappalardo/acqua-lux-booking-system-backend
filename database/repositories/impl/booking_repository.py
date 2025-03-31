@@ -32,21 +32,9 @@ class BookingRepository(BookingRepositoryMeta):
         return reservation_data
 
     def edit_reservation(self, reservation_data: Booking) -> Booking:
-        stmt = update(Booking).where(Booking.id == reservation_data.id).values(
-            start_date=reservation_data.start_date,
-            end_date=reservation_data.end_date,
-            boat_id=reservation_data.boat_id,
-            total_price=reservation_data.total_price,
-            price_difference=reservation_data.price_difference,
-            requires_refund=reservation_data.requires_refund,
-            notes=reservation_data.notes,
-        )
-        self._db.execute(stmt)
         self._db.commit()
-        self._db.flush()
-
-        stmt_get = select(Booking).where(Booking.id == reservation_data.id)
-        return self._db.scalar(stmt_get)
+        self._db.refresh(reservation_data)
+        return reservation_data
 
     """
         Questo metodo mi consente di verificare se il medesimo utente ha prenotazioni

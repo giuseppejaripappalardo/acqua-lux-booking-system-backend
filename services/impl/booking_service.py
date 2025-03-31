@@ -222,18 +222,28 @@ class BookingService(BookingServiceMeta):
             per persisterlo nel database. Manteniamo il reservation_code visto che comunque si tratta di una modifica
             di una prenotazione esistente.
         """
-        reservation = Booking(
-            **edited_reservation.model_dump(),
-            id=reservation_data.booking_id,
-            reservation_code=reservation_to_edit.reservation_code,
-            reservation_status=BookingStatuses.CONFIRMED,
-            total_price=new_total,
-            price_difference=price_difference,
-            requires_refund=refund,
-            modified_at=current_timestamp
-        )
+        # reservation = Booking(
+        #     **edited_reservation.model_dump(),
+        #     id=reservation_data.booking_id,
+        #     reservation_code=reservation_to_edit.reservation_code,
+        #     reservation_status=BookingStatuses.CONFIRMED,
+        #     total_price=new_total,
+        #     price_difference=price_difference,
+        #     requires_refund=refund,
+        #     modified_at=current_timestamp
+        # )
 
-        return self._booking_repository.edit_reservation(reservation)
+        reservation_to_edit.seat = edited_reservation.seat
+        reservation_to_edit.start_date = edited_reservation.start_date
+        reservation_to_edit.end_date = edited_reservation.end_date
+        reservation_to_edit.boat_id = edited_reservation.boat_id
+        reservation_to_edit.notes = edited_reservation.notes
+        reservation_to_edit.total_price = new_total
+        reservation_to_edit.price_difference = price_difference
+        reservation_to_edit.requires_refund = refund
+        reservation_to_edit.modified_at = current_timestamp
+
+        return self._booking_repository.edit_reservation(reservation_to_edit)
 
     def delete_booking(self, logged_user: TokenPayload, booking_id: int) -> Booking:
         booking_to_delete = self._booking_repository.get_booking(booking_id)
