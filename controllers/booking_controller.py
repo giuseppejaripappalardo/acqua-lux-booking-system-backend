@@ -60,7 +60,7 @@ async def edit_reservation(request: Request, edit_reservation_data: EditBookingR
     logged_user = AuthChecker.get_logged_in_user(request)
     return success_response(booking_service.edit_reservation(edit_reservation_data, logged_user))
 
-@router.delete(
+@router.post(
     "/delete",
     response_model=BaseResponse[BookingResponse],
     summary="Questo endpoint permette di modificare lo stato di una prenotazione esistente nel sistema in CANCELLED.",
