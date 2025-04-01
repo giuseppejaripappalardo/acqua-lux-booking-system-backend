@@ -155,11 +155,10 @@ class BookingService(BookingServiceMeta):
         """
         current_date = datetime.now(timezone.utc)
         start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_to_edit.start_date)
-
-        self._logger_service.logger.info(f"START DATE ORIGINALE: {reservation_to_edit.start_date} - tz: {reservation_to_edit.start_date.tzinfo}")
+        self._logger_service.logger.info(
+            f"START DATE ORIGINALE: {reservation_to_edit.start_date} - tz: {reservation_to_edit.start_date.tzinfo}")
         self._logger_service.logger.info(f"START DATE UTC: {start_date}")
         self._logger_service.logger.info(f"CURRENT UTC: {current_date}")
-
         if start_date <= current_date:
             raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)
 
@@ -254,6 +253,16 @@ class BookingService(BookingServiceMeta):
             self._logger_service.logger.info(
                 "Attenzione, un utente sta cercando di modificare la prenotazione di un altro utente.")
             raise AcquaLuxBaseException(message=Messages.DELETE_OPERATION_NOT_ALLOWED.value, code=403)
+
+        """
+            Verifichiamo se la prenotazione è cancellabile.
+            Se è già stata cancellata allora dobbiamo informare l'utente
+            e non fare nessuna azione. Qui è sicuro dare un messaggio specifico
+            perchè sopra, stiamo controllando se l'utente che cancella è l'utente autenticato ovvero
+            colui che ha fatto la prenotazione. Quindi non stiamo fornendo dati sensitivi.
+        """
+        if booking_to_delete.reservation_status == BookingStatuses.CANCELLED:
+            raise AcquaLuxBaseException(message=Messages.BOOKING_ALREADY_DELETED.value, code=422)
 
         """
             A questo punto un aspetto molto importante da verificare è quello di capire se si sta cercando di modificare una prenotazione già in corso.

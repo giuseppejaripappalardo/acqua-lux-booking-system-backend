@@ -17,6 +17,7 @@ class Messages(Enum):
     DELETE_OPERATION_NOT_ALLOWED = "Non puoi eliminare una prenotazione effettuata da un altro utente."
     NO_BOOKINGS_DELETED = "Non è stata eliminata alcuna prenotazione."
     BOOKING_TO_EDIT_NOT_FOUND = "La prenotazione che si sta cercando di modificare non è stata trovata."
+    BOOKING_ALREADY_DELETED = "Non è possibile annullare una prenotazione che risulta già in stato anullata."
     BOOKING_EDIT_INCOMPATIBLE_STATE = "La prenotazione è in uno stato che non consente la visualizzazione e/o modifica."
     BOOKING_CUSTOMER_ONLY = "Puoi modificare solo le prenotazione a te associate."
     GET_BOOKING_CUSTOMER_ONLY = "Puoi visualizzare solo le prenotazioni a te associate."
