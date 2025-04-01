@@ -28,7 +28,8 @@ class BoatService(BoatServiceMeta):
         booking_validator(booking_request)
 
         """
-            Anche qui per renderlo esplicito mettiamo la conversione a UTC
+            Solo per una questione di chiarezza faccio il controllo anche qui sul timezone.
+            Considerando che comunque 
         """
         booking_request.start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.start_date)
         booking_request.end_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.end_date)

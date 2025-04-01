@@ -1,6 +1,4 @@
-from datetime import datetime, timedelta
-
-import pytz
+from datetime import datetime, timedelta, timezone
 
 from exceptions.dates.InvalidDatetimeException import InvalidDatetimeException
 from exceptions.generic.integrity_database_exception import IntegrityDatabaseException
@@ -38,11 +36,15 @@ def booking_validator(booking_request: SearchBoatRequest):
             IntegrityDatabaseException: Se il numero di posti richiesto è inferiore a 1.
     """
 
-    current_date = datetime.now(pytz.utc)
+    current_date = datetime.now(timezone.utc)
     logger_service = LoggerService().logger
 
     """
-        Convertiamo le date in UTC, assumendo che arriveranno sempre con timezone Europe/Rome.
+        Semplifico l'approccio per la valutazione delle date. La utility di base fa una cosa semplice.
+        Se la data non ha timezone e assume local è False, allora viene aggiunto il timezone UTC, senza alterarne il valore.
+        Se assume local è true, allora viene aggiunto il timezone Rome anche qui senza alterare il contenuto.
+        Se il timezone c'è ed è diverso da UTC assumiamo che sia in UTC.
+        Di default il frontend è configurato per mandare date in formato UTC e mostrarle all'utente in formato Europe/Rome.
     """
     booking_request.start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.start_date)
     booking_request.end_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.end_date)

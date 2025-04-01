@@ -1,9 +1,8 @@
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import uuid4
 
-import pytz
 from fastapi import Depends
 
 from database.entities.booking import Booking
@@ -61,7 +60,7 @@ class BookingService(BookingServiceMeta):
 
         """
             Normalizzo le date in UTC anche qui per chiarezza,
-            anche se il validator già le ha convertite.
+            anche se il validator già effettua le opportune verifiche e nel caso fa il cast appropriato.
         """
         reservation_data.start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_data.start_date)
         reservation_data.end_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_data.end_date)
@@ -98,7 +97,8 @@ class BookingService(BookingServiceMeta):
         price_per_hour: Decimal = get_boat_to_book.price_per_hour
         diff_hours = math.ceil((reservation_data.end_date - reservation_data.start_date).total_seconds() / 3600)
         total_amount: Decimal = price_per_hour * Decimal(diff_hours)
-        current_timestamp = datetime.now(pytz.utc)
+        current_timestamp = datetime.now(timezone.utc)
+
         reservation = Booking(
             **reservation_data.model_dump(),
             reservation_code=uuid4().hex,
@@ -153,8 +153,8 @@ class BookingService(BookingServiceMeta):
             Quindi se start_date è maggiore della current date allora non possiamo consentire la modifica. Vuol dire che il charter è già in corso.
             Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
         """
-        current_date = datetime.now(pytz.utc)
-        start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_to_edit.start_date, assume_local=False)
+        current_date = datetime.now(timezone.utc)
+        start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_to_edit.start_date)
 
         self._logger_service.logger.info(f"START DATE ORIGINALE: {reservation_to_edit.start_date} - tz: {reservation_to_edit.start_date.tzinfo}")
         self._logger_service.logger.info(f"START DATE UTC: {start_date}")
@@ -221,7 +221,7 @@ class BookingService(BookingServiceMeta):
         price_difference = new_total - old_total
         refund = price_difference < 0
 
-        current_timestamp = datetime.now(pytz.utc)
+        current_timestamp = datetime.now(timezone.utc)
 
         """
             Se siamo arrivati fin qui abbiamo superato tutti i controlli. Significa che possiamo costruire il modello
@@ -261,8 +261,8 @@ class BookingService(BookingServiceMeta):
             Quindi se start_date è maggiore della current date allora non possiamo consentire la modifica. Vuol dire che il charter è già in corso.
             Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
         """
-        current_date = datetime.now(pytz.utc)
-        start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_to_delete.start_date, assume_local=False)
+        current_date = datetime.now(timezone.utc)
+        start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_to_delete.start_date)
 
         if start_date <= current_date:
             raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)

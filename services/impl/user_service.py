@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 from fastapi import Depends
 
 from database.entities.user import User
@@ -28,7 +27,7 @@ class UserService(UserServiceMeta):
             Metodo preposto del service per la creazione degli utenti.
         """
         hashed_password = PassowrdHasher().bcrypt_hash_password(user.password)
-        current_timestamp = datetime.now(pytz.utc)
+        current_timestamp = datetime.now(timezone.utc)
         new_user = User(
             username=user.username,
             password=hashed_password,

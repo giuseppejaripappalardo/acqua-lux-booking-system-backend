@@ -1,7 +1,6 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-import pytz
 from fastapi import Depends, Response, Request
 
 from database.entities.user import User
@@ -39,7 +38,7 @@ class AuthService(AuthServiceMeta):
         payload: TokenPayload = TokenPayload(
             sub=str(user.id),
             role=user.role.name.value,
-            exp=datetime.now(pytz.utc) + timedelta(minutes=int(self.ACCESS_TOKEN_EXPIRE_MINUTES))
+            exp=datetime.now(timezone.utc) + timedelta(minutes=int(self.ACCESS_TOKEN_EXPIRE_MINUTES))
         )
 
         response_jwt_token = JwtUtils.create_access_token(payload)
