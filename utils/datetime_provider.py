@@ -20,7 +20,7 @@ class DateTimeProvider:
         return utc_timestamp.astimezone(pytz.timezone("Europe/Rome"))
 
     @staticmethod
-    def parse_input_datetime_to_utc(dt: datetime, assume_local: bool = False) -> datetime:
+    def parse_input_datetime_to_utc(dt: datetime, assume_local: bool = True) -> datetime:
         if dt.tzinfo is None:
             if assume_local:
                 dt = pytz.timezone("Europe/Rome").localize(dt)
