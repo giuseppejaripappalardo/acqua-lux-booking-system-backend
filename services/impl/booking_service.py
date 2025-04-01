@@ -154,7 +154,7 @@ class BookingService(BookingServiceMeta):
             Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
         """
         current_date = datetime.now(pytz.utc)
-        start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_to_edit.start_date)
+        start_date = DateTimeProvider.parse_input_datetime_to_utc(reservation_to_edit.start_date, assume_local=False)
 
         self._logger_service.logger.info(f"START DATE ORIGINALE: {reservation_to_edit.start_date} - tz: {reservation_to_edit.start_date.tzinfo}")
         self._logger_service.logger.info(f"START DATE UTC: {start_date}")
@@ -262,7 +262,7 @@ class BookingService(BookingServiceMeta):
             Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
         """
         current_date = datetime.now(pytz.utc)
-        start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_to_delete.start_date)
+        start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_to_delete.start_date, assume_local=False)
 
         if start_date <= current_date:
             raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)
