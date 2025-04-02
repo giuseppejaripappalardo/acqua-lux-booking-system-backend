@@ -18,7 +18,7 @@ async def login(response: Response, credentials: LoginRequest, auth_service: Aut
     return success_response(auth_service.login(response, credentials))
 
 @router.post(
-    "/get_token",
+    "/get-token",
     response_model=BaseResponse[TokenResponse],
     summary="Il metodo serve per ottenere il token a partire da un cookie sicuro e non accessibile al frontend..",
     description="Utilizziamo il cookie come strumento di salvataggio del token. Questo ci garantisce maggiore robustezza in quanto un cookie http only e Secure previene problemi di attacchi XSS, tipici nel caso in cui si salva il token in un cookie non sicuro o in localStorage.")

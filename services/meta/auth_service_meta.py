@@ -1,9 +1,9 @@
 from abc import abstractmethod, ABC
 
-from exceptions.base_exception import AcquaLuxBaseException
+from fastapi import Response, Request
+
 from models.request.auth.auth_request import LoginRequest
 from models.response.auth.auth_response import TokenResponse
-from fastapi import Response, Request
 
 
 class AuthServiceMeta(ABC):

@@ -2,8 +2,7 @@ from abc import abstractmethod, ABC
 
 from database.entities.booking import Booking
 from models.object.token_payload import TokenPayload
-from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest, GetBookingByIdRequest
-from models.response.booking.booking_response import BookingResponse
+from models.request.booking.booking_request import CustomerBookingRequest, EditBookingRequest
 
 
 class BookingServiceMeta(ABC):

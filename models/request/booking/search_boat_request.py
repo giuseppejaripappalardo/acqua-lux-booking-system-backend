@@ -8,3 +8,7 @@ class SearchBoatRequest(BaseModel):
     start_date: datetime
     end_date: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+class EditSearchBoatRequest(SearchBoatRequest):
+    booking_id: int

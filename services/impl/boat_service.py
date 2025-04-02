@@ -23,6 +23,11 @@ class BoatService(BoatServiceMeta):
         return self._boat_repository.find_all()
 
     def find_available_boats_for_booking(self, booking_request: SearchBoatRequest) -> list[Boat]:
+        existing_booking_id = None
+
+        if booking_request.booking_id is not None:
+            existing_booking_id = booking_request.booking_id
+
         # Metodo preposto alla validazione
         # Consultare l'implementazione per avere tutti i dettagli.
         booking_validator(booking_request)
@@ -34,4 +39,4 @@ class BoatService(BoatServiceMeta):
         booking_request.start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.start_date)
         booking_request.end_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.end_date)
 
-        return self._boat_repository.find_available_boats_for_booking(booking_request)
+        return self._boat_repository.find_available_boats_for_booking(booking_request, existing_booking_id)

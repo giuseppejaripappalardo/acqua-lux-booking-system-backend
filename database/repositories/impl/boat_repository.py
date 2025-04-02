@@ -26,18 +26,36 @@ class BoatRepository(BoatRepositoryMeta):
         stmt = select(Boat)
         return list(self._db.scalars(stmt))
 
-    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest) -> list[Boat]:
+    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest,
+                                         existing_booking_id: int | None = None) -> list[Boat]:
+
+        conditions = [
+            Booking.boat_id == Boat.id,
+            Booking.start_date < booking_request.end_date,
+            Booking.end_date > booking_request.start_date,
+            Booking.reservation_status == BookingStatuses.CONFIRMED
+        ]
+
+
+        """
+            Questo metodo riceve existing_booking_id solo nel caso in cui si stia modificando una prenotazione.
+            La modifica implica la verifica delle disponibilità e questo controllo è essenziale per escludere 
+            l'imbarcazione presente nella prenotazione che stiamo modificando. Ad esempio il cliente potrebbe
+            voler modificare soltanto le date e scegliere comunque la stessa imbarcazione.
+        """
+        if existing_booking_id is not None:
+            conditions.append(Booking.id != existing_booking_id)
+
+        search_terms = and_(
+            conditions
+        )
+
         stmt = (
             select(Boat)
             .join(BoatStatuses)
             .outerjoin(
                 Booking,
-                and_(
-                    Booking.boat_id == Boat.id,
-                    Booking.start_date < booking_request.end_date,
-                    Booking.end_date > booking_request.start_date,
-                    Booking.reservation_status == BookingStatuses.CONFIRMED
-                )
+
             )
             .where(
                 BoatStatuses.name == BoatStatusesValues.AVAILABLE,
@@ -48,7 +66,7 @@ class BoatRepository(BoatRepositoryMeta):
         )
         return list(self._db.scalars(stmt))
 
-    def get_boat_to_book(self, booking_request: SearchBoatRequest, customer_id: int = None) -> Boat:
+    def get_boat_to_book(self, booking_request: SearchBoatRequest, booking_id: int = None) -> Boat:
         """
             Questo metodo è utilizzato per capire se l'imbarcazione selezionata è disponibile
             e può essere correttamente prenotata oppure se è già riservata.
@@ -61,8 +79,9 @@ class BoatRepository(BoatRepositoryMeta):
         )
 
         """
-            Quando viene fornito un customer_id, escludiamo le prenotazioni di questo cliente 
-            dal controllo di conflitti. Questo perché un cliente deve poter modificare la propria
+            Quando viene fornito un booking_id, escludiamo le prenotazioni di questo cliente 
+            dal controllo di conflitti solo per il booking che si sta modificando. 
+            Questo perché un cliente deve poter modificare la propria
             prenotazione senza che il sistema la consideri come "già occupata".
             In sostanza se il cliente ha già prenotato una barca e vuole cambiare le date 
             della sua prenotazione, il sistema deve permetterglielo ignorando il fatto che quella 
@@ -70,10 +89,10 @@ class BoatRepository(BoatRepositoryMeta):
             Questo è importante prevalentemente per la modifica. In fase di prenotazione invece 
             va bene non passare il customer_id.
         """
-        if customer_id is not None:
+        if booking_id is not None:
             booking_overlap_condition = and_(
                 booking_overlap_condition,
-                Booking.customer_id != customer_id
+                Booking.id != booking_id
             )
 
         stmt_boat = (

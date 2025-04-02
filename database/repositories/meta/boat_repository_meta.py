@@ -11,7 +11,7 @@ class BoatRepositoryMeta(ABC):
         pass
 
     @abstractmethod
-    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest) -> list[Boat]:
+    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest, existing_booking_id: int | None) -> list[Boat]:
         pass
 
     @abstractmethod
