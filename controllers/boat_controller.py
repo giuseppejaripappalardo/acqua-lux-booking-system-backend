@@ -34,4 +34,4 @@ async def search_for_available_boats(reservation_data: SearchBoatRequest, boat_s
     description="Recupera e restituisce un elenco di imbarcazioni disponibili alla prenotazione nel periodo specificato considerando però l'imbarcazione prevista nella prenotazione da modificare."
 )
 async def edit_search_for_available_boats(reservation_data: EditSearchBoatRequest, boat_service: BoatServiceMeta = Depends(BoatService)) -> BaseResponse[list[BoatResponse]]:
-    return success_response( boat_service.find_available_boats_for_booking(reservation_data, reservation_data.booking_id))
+    return success_response( boat_service.find_available_boats_for_booking(reservation_data))

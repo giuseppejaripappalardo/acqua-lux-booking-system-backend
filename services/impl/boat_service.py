@@ -3,7 +3,7 @@ from fastapi import Depends
 from database.entities.boat import Boat
 from database.repositories.impl.boat_repository import BoatRepository
 from database.repositories.meta.boat_repository_meta import BoatRepositoryMeta
-from models.request.booking.search_boat_request import SearchBoatRequest
+from models.request.booking.search_boat_request import SearchBoatRequest, EditSearchBoatRequest
 from services.meta.boat_service_meta import BoatServiceMeta
 from utils.datetime_provider import DateTimeProvider
 from utils.logger_service import LoggerService
@@ -22,7 +22,7 @@ class BoatService(BoatServiceMeta):
     def find_all(self) -> list[Boat]:
         return self._boat_repository.find_all()
 
-    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest, booking_id: int | None = None) -> list[Boat]:
+    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest | EditSearchBoatRequest) -> list[Boat]:
         existing_booking_id = None
 
         if booking_request.booking_id is not None:

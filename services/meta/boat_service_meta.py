@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 
 from database.entities.boat import Boat
-from models.request.booking.search_boat_request import SearchBoatRequest
+from models.request.booking.search_boat_request import SearchBoatRequest, EditSearchBoatRequest
 
 
 class BoatServiceMeta(ABC):
@@ -16,5 +16,5 @@ class BoatServiceMeta(ABC):
         pass
 
     @abstractmethod
-    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest, booking_id: int | None = None) -> list[Boat]:
+    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest | EditSearchBoatRequest) -> list[Boat]:
         pass
