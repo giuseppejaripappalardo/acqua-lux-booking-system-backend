@@ -54,7 +54,7 @@ app.add_middleware(
 async def check_auth_and_role(request: Request, call_next):
     public_routes: list[str] = [
         "/api/v1/auth/login",
-        "/api/v1/auth/get_token",
+        "/api/v1/auth/get-token",
         "/api/docs",
         "/api/redoc",
         "/api/openapi.json",
