@@ -25,7 +25,7 @@ async def boats_list(request: Request, boat_service: BoatServiceMeta = Depends(B
     description="Recupera e restituisce un elenco di imbarcazioni disponibili alla prenotazione nel periodo specificato."
 )
 async def search_for_available_boats(reservation_data: SearchBoatRequest, boat_service: BoatServiceMeta = Depends(BoatService)) -> BaseResponse[list[BoatResponse]]:
-    return success_response( boat_service.find_available_boats_for_booking(reservation_data, None))
+    return success_response( boat_service.find_available_boats_for_booking(reservation_data))
 
 @router.post(
     "/edit-search-available-boats",

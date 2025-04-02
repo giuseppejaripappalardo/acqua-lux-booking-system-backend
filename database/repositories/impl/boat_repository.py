@@ -47,7 +47,7 @@ class BoatRepository(BoatRepositoryMeta):
             conditions.append(Booking.id != existing_booking_id)
 
         search_terms = and_(
-            conditions
+            *conditions
         )
 
         stmt = (
@@ -55,7 +55,7 @@ class BoatRepository(BoatRepositoryMeta):
             .join(BoatStatuses)
             .outerjoin(
                 Booking,
-
+                search_terms
             )
             .where(
                 BoatStatuses.name == BoatStatusesValues.AVAILABLE,

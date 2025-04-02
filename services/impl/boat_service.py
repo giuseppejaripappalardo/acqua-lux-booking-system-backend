@@ -25,7 +25,7 @@ class BoatService(BoatServiceMeta):
     def find_available_boats_for_booking(self, booking_request: SearchBoatRequest | EditSearchBoatRequest) -> list[Boat]:
         existing_booking_id = None
 
-        if booking_request.booking_id is not None:
+        if isinstance(booking_request, EditSearchBoatRequest) and booking_request.booking_id is not None:
             existing_booking_id = booking_request.booking_id
 
         # Metodo preposto alla validazione
