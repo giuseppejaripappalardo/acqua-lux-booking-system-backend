@@ -22,7 +22,7 @@ class BoatService(BoatServiceMeta):
     def find_all(self) -> list[Boat]:
         return self._boat_repository.find_all()
 
-    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest) -> list[Boat]:
+    def find_available_boats_for_booking(self, booking_request: SearchBoatRequest, booking_id: int | None = None) -> list[Boat]:
         existing_booking_id = None
 
         if booking_request.booking_id is not None:
