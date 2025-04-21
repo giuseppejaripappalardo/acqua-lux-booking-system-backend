@@ -58,7 +58,7 @@ software e garantendo un'esperienza utente ottimale attraverso API REST ben stru
 ## 📖 Documentazione API
 
 La documentazione completa delle API è accessibile attraverso l'interfaccia Swagger UI, disponibile all'indirizzo
-`/docs` dopo l'avvio del server.
+`/api/docs` dopo l'avvio del server.
 
 ## 👨‍💻 Sviluppato da
 
