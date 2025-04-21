@@ -9,42 +9,13 @@ from utils.logger_service import LoggerService
 
 
 def booking_validator(booking_request: SearchBoatRequest):
-    """
-        Valida i parametri per richieste di prenotazione (ricerca, inserimento, modifica).
-
-        Questa funzione esegue le seguenti operazioni:
-
-        - Validazione cronologica delle date:
-            - La data di inizio `start_date` deve essere precedente alla data di fine `end_date`.
-            - La data di inizio deve essere futura rispetto all'ora corrente, applicando un buffer minimo di 1 ora per evitare prenotazioni immediate.
-            - La data di inizio e la data di fine devono avere una durata minima di almeno 1 ora.
-
-        - Gestione dei timezone:
-            - Se gli oggetti datetime ricevuti non specificano un timezone, viene assunto come default il timezone `Europe/Rome`.
-            - Tutti i datetime con timezone, a questo punto, vengono convertiti in UTC, garantendo uniformità nella memorizzazione dei dati (tutte le date nel DB sono salvate in UTC).
-
-        - Validazione del numero di posti richiesti:
-            - Il numero di posti `seat_number` deve essere almeno 1.
-
-        Si utilizza la classe `SearchBoatRequest` per sfruttarne il polimorfismo, consentendo così il riutilizzo della logica per classi derivate, come `BookingRequest`, evitando duplicazioni (principio DRY).
-
-        Args:
-            booking_request (SearchBoatRequest): Oggetto della richiesta con i parametri da validare.
-
-        Raises:
-            InvalidDatetimeException: Se le date non rispettano i vincoli sopraindicati.
-            IntegrityDatabaseException: Se il numero di posti richiesto è inferiore a 1.
-    """
-
     current_date = datetime.now(timezone.utc)
     logger_service = LoggerService().logger
 
     """
-        Semplifico l'approccio per la valutazione delle date. La utility di base fa una cosa semplice.
-        Se la data non ha timezone e assume local è False, allora viene aggiunto il timezone UTC, senza alterarne il valore.
-        Se assume local è true, allora viene aggiunto il timezone Rome anche qui senza alterare il contenuto.
-        Se il timezone c'è ed è diverso da UTC assumiamo che sia in UTC.
         Di default il frontend è configurato per mandare date in formato UTC e mostrarle all'utente in formato Europe/Rome.
+        Per sicurezza in ogni caso chiamiamo parse_input_datetime_to_utc per controllare se è presente il timezone ed è corretto.
+        Il metodo restituisce un datetime valido in formato UTC.
     """
     booking_request.start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.start_date)
     booking_request.end_date = DateTimeProvider.parse_input_datetime_to_utc(booking_request.end_date)
@@ -80,6 +51,8 @@ def booking_validator(booking_request: SearchBoatRequest):
     if booking_request.end_date - booking_request.start_date < timedelta(hours=1):
         raise InvalidDatetimeException(message=Messages.MIN_DURATION_NOT_SATISFIED.value)
 
-
+    """
+        Ci assicuriamo che il numero di posti richiesto sia almeno 1.
+    """
     if booking_request.seat < 1:
         raise IntegrityDatabaseException(Messages.MINIMUM_SEAT_REQUEST.value)

@@ -68,8 +68,14 @@ class BoatRepository(BoatRepositoryMeta):
 
     def get_boat_to_book(self, booking_request: SearchBoatRequest, booking_id: int = None) -> Boat:
         """
-            Questo metodo è utilizzato per capire se l'imbarcazione selezionata è disponibile
-            e può essere correttamente prenotata oppure se è già riservata.
+        Queste condizioni servono a verificare se ci sono sovrapposizioni tra la prenotazione
+        richiesta e altre prenotazioni esistenti.
+        In pratica, sto cercando qualsiasi prenotazione confermata per la stessa barca
+        che si sovrapponga al periodo richiesto. Una sovrapposizione avviene quando:
+        - Si tratta della stessa barca che si sta cercando di prenotare
+        - Il periodo della prenotazione esistente (ovvero una prenotazione) si sovrappone in qualche modo
+          con il periodo richiesto
+        - La prenotazione è confermata (escludo volutamente quelle in stato CANCELLED)
         """
         booking_overlap_condition = and_(
             Booking.boat_id == Boat.id,
@@ -79,15 +85,10 @@ class BoatRepository(BoatRepositoryMeta):
         )
 
         """
-            Quando viene fornito un booking_id, escludiamo le prenotazioni di questo cliente 
+            Quando viene fornito un booking_id per la modifica, escludiamo le prenotazioni di questo cliente 
             dal controllo di conflitti solo per il booking che si sta modificando. 
-            Questo perché un cliente deve poter modificare la propria
-            prenotazione senza che il sistema la consideri come "già occupata".
-            In sostanza se il cliente ha già prenotato una barca e vuole cambiare le date 
-            della sua prenotazione, il sistema deve permetterglielo ignorando il fatto che quella 
-            risorsa risulti già occupata da lui stesso nel periodo richiesto.
-            Questo è importante prevalentemente per la modifica. In fase di prenotazione invece 
-            va bene non passare il customer_id.
+            Questo perché un cliente deve poter modificare la propria prenotazione senza che il sistema la consideri come "già occupata".
+            Esempio (se il cliente ha già prenotato una barca e vuole cambiare le date)
         """
         if booking_id is not None:
             booking_overlap_condition = and_(
@@ -95,13 +96,18 @@ class BoatRepository(BoatRepositoryMeta):
                 Booking.id != booking_id
             )
 
-        stmt_boat = (
-            select(Boat)
+        """
+            Con questa query cerco una barca che:
+            - È disponibile secondo lo stato generale del sistema
+            - Ha abbastanza posti per le persone richieste
+            - Corrisponde alla barca specifica richiesta dal cliente
+            - Non ha sovrapposizioni con altre prenotazioni nel periodo desiderato
+              (questo è garantito dalla condizione Booking.id.is_(None) combinata
+              con l'outerjoin che abbiamo definito sopra)
+        """
+        stmt_boat = (select(Boat)
             .join(BoatStatuses)
-            .outerjoin(
-                Booking,
-                booking_overlap_condition
-            )
+            .outerjoin(Booking, booking_overlap_condition)
             .where(
                 BoatStatuses.name == BoatStatusesValues.AVAILABLE,
                 Boat.seat >= booking_request.seat,
