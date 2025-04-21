@@ -52,6 +52,10 @@ app.add_middleware(
 """
 @app.middleware("http")
 async def check_auth_and_role(request: Request, call_next):
+
+    """
+        Lista di routes pubbliche.
+    """
     public_routes: list[str] = [
         "/api/v1/auth/login",
         "/api/v1/auth/get-token",
@@ -60,12 +64,19 @@ async def check_auth_and_role(request: Request, call_next):
         "/api/openapi.json",
     ]
 
-    # Se l'url visitato è presente nella lista di quelli pubblici
-    # Restituiamo la risposta senza effettuare il controllo per per l'autenticazione
+    """
+        Se l'url visitato è presente nella lista di quelli pubblici
+        Ritorno la risposta senza effettuare il controllo per l'autenticazione
+    """
     if request.url.path in public_routes:
         return await call_next(request)
     else:
-        # In tutti gli altri casi chiamiamo il metodo per controllare se l'utente è autenticato ed infine ritorniamo la risposta.
+        """
+        In tutti gli altri casi controlliamo se l'utente è 
+        autenticato e infine ritorniamo la risposta.
+        Se l'utente non è autenticato il metodo lancerà 
+        AuthException(code=401, message=Messages.INVALID_AUTH_TOKEN.value)
+        """
         AuthChecker.assert_user_is_authenticated(request)
     response = await call_next(request)
     return response
