@@ -32,7 +32,7 @@ logger_service = LoggerService().logger
     Configurazione del middleware per le richieste cross-origin.
 """
 
-origins: [str] = [
+origins: list[str] = [
     "https://giuseppejaripappalardo.dev",
     "http://localhost:5173"
 ]
