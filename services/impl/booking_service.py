@@ -240,6 +240,10 @@ class BookingService(BookingServiceMeta):
         return self._booking_repository.edit_reservation(reservation_to_edit)
 
     def delete_booking(self, logged_user: TokenPayload, booking_id: int) -> Booking:
+        """
+            Prima di eseguire qualsiasi operazione mi assicuro che la prenotazione che si vuole cancellare
+            esista, altrimenti lanciamo un eccezione.
+        """
         booking_to_delete = self._booking_repository.get_booking(booking_id)
         if booking_to_delete is None:
             raise GenericNotFoundException()
@@ -267,15 +271,23 @@ class BookingService(BookingServiceMeta):
         """
             A questo punto un aspetto molto importante da verificare è quello di capire se si sta cercando di modificare una prenotazione già in corso.
             Di base per semplificare le logiche, assumo che una prenotazione in corso non può più essere modificata.
-            Quindi se start_date è maggiore della current date allora non possiamo consentire la modifica. Vuol dire che il charter è già in corso.
+            Quindi se start_date è maggiore della current date allora non possiamo consentire la cancellazione. Vuol dire che il charter è già in corso.
             Faremo il controllo del datetime now in UTC, visto che come indicato anche in altri punti, tutte le date a DB sono salvate in UTC.
         """
         current_date = datetime.now(timezone.utc)
         start_date = DateTimeProvider.parse_input_datetime_to_utc(booking_to_delete.start_date)
 
+        """
+            Se la data di inizio è minore o uguale alla data corrente allora lanciamo l'eccezione
+            e non consentiamo il soft delete.
+        """
         if start_date <= current_date:
             raise AcquaLuxBaseException(message=Messages.BOOKING_MODIFICATION_NOT_ALLOWED.value, code=422)
 
+        """
+            Se abbiamo superato tutti i controlli a questo punto aggiorniamo lo stato
+            in CANCELLED e aggiorniamo la data di modifica per tracciare l'operazione.
+        """
         booking_to_delete.reservation_status = BookingStatuses.CANCELLED
         booking_to_delete.modified_at = current_date
         return self._booking_repository.delete_booking(booking_to_delete)
