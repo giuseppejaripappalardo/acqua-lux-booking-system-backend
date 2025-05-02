@@ -13,8 +13,34 @@ router = APIRouter()
 @router.get(
     "/list",
     response_model=BaseResponse[list[RoleResponse]],
-    summary="Questo endpoint permette di creare un nuovo utente nel sistema.",
-    description="Fornisce la possibilità di aggiungere un nuovo utente fornendo i dati necessari."
+    summary="Questo endpoint permette di ottenere la lista dei ruoli disponibili nel sistema.",
+    description="Recupera e restituisce un elenco di tutti i ruoli registrati nel sistema.",
+    responses={
+        401: {
+            "description": "Errore di autenticazione - Utente non autenticato",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Invalid authentication token"}
+                }
+            }
+        },
+        403: {
+            "description": "Errore di autorizzazione - Utente non autorizzato (richiesto ruolo ADMIN)",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "User does not have the required role"}
+                }
+            }
+        },
+        500: {
+            "description": "Errore interno del server",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Internal server error"}
+                }
+            }
+        }
+    }
 )
 async def role_list(request: Request, role_service: RoleServiceMeta = Depends(RoleService)) -> BaseResponse[list[RoleResponse]]:
     AuthChecker.assert_has_role(request, [Roles.ADMIN.value])

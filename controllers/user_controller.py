@@ -15,7 +15,41 @@ router = APIRouter()
     "/add",
     response_model=BaseResponse[UserResponse],
     summary="Questo endpoint permette di creare un nuovo utente nel sistema.",
-    description="Fornisce la possibilità di aggiungere un nuovo utente fornendo i dati necessari."
+    description="Fornisce la possibilità di aggiungere un nuovo utente fornendo i dati necessari.",
+    responses={
+        401: {
+            "description": "Errore di autenticazione - Utente non autenticato",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Invalid authentication token"}
+                }
+            }
+        },
+        403: {
+            "description": "Errore di autorizzazione - Utente non autorizzato (richiesto ruolo ADMIN)",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "User does not have the required role"}
+                }
+            }
+        },
+        409: {
+            "description": "Errore - Username già esistente",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "User already exists"}
+                }
+            }
+        },
+        422: {
+            "description": "Errore di validazione - Dati utente non validi",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Validation error"}
+                }
+            }
+        }
+    }
 )
 async def user_add(request: Request, user: UserRequest, user_service: UserServiceMeta = Depends(UserService)) -> BaseResponse[UserResponse]:
     AuthChecker.assert_has_role(request, [Roles.ADMIN.value])
@@ -25,7 +59,33 @@ async def user_add(request: Request, user: UserRequest, user_service: UserServic
     "/list",
     response_model=BaseResponse[list[UserResponse]],
     summary="Mostra la lista di tutti gli utenti registrati",
-    description="Recupera e restituisce un elenco di tutti gli utenti registrati nel sistema."
+    description="Recupera e restituisce un elenco di tutti gli utenti registrati nel sistema.",
+    responses={
+        401: {
+            "description": "Errore di autenticazione - Utente non autenticato",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Invalid authentication token"}
+                }
+            }
+        },
+        403: {
+            "description": "Errore di autorizzazione - Utente non autorizzato (richiesto ruolo ADMIN)",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "User does not have the required role"}
+                }
+            }
+        },
+        500: {
+            "description": "Errore interno del server",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Internal server error"}
+                }
+            }
+        }
+    }
 )
 async def users_list(request: Request, user_service: UserServiceMeta = Depends(UserService)) -> BaseResponse[list[UserResponse]]:
     AuthChecker.assert_has_role(request, [Roles.ADMIN.value])

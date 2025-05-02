@@ -13,7 +13,17 @@ router = APIRouter()
     "/login",
     response_model=BaseResponse[TokenResponse],
     summary="Questo endpoint permette di creare un nuovo utente nel sistema.",
-    description="Fornisce la possibilità di aggiungere un nuovo utente fornendo i dati necessari.")
+    description="Fornisce la possibilità di aggiungere un nuovo utente fornendo i dati necessari.",
+    responses={
+        401: {
+            "description": "Errore di autenticazione - Credenziali non valide",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Invalid username or password"}
+                }
+            }
+        }
+    })
 async def login(response: Response, credentials: LoginRequest, auth_service: AuthServiceMeta = Depends(AuthService)):
     return success_response(auth_service.login(response, credentials))
 
@@ -21,7 +31,17 @@ async def login(response: Response, credentials: LoginRequest, auth_service: Aut
     "/get-token",
     response_model=BaseResponse[TokenResponse],
     summary="Il metodo serve per ottenere il token a partire da un cookie sicuro e non accessibile al frontend..",
-    description="Utilizziamo il cookie come strumento di salvataggio del token. Questo ci garantisce maggiore robustezza in quanto un cookie http only e Secure previene problemi di attacchi XSS, tipici nel caso in cui si salva il token in un cookie non sicuro o in localStorage.")
+    description="Utilizziamo il cookie come strumento di salvataggio del token. Questo ci garantisce maggiore robustezza in quanto un cookie http only e Secure previene problemi di attacchi XSS, tipici nel caso in cui si salva il token in un cookie non sicuro o in localStorage.",
+    responses={
+        401: {
+            "description": "Errore di autenticazione - Cookie JWT mancante o token non valido",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Missing authentication header"}
+                }
+            }
+        }
+    })
 async def get_token(request: Request, auth_service: AuthServiceMeta = Depends(AuthService)):
     return success_response(auth_service.refresh(request))
 
@@ -30,6 +50,16 @@ async def get_token(request: Request, auth_service: AuthServiceMeta = Depends(Au
     "/logout",
     response_model=BaseResponse,
     summary="Il metodo distrugge semplicemente il cookie.",
-    description="Il metodo distrugge il cookie che contiene il token jwt. In un sistema più articolato avremmo previsto anche una blacklist. Ma va fuori dagli scopi del project work e quindi teniamo questo approccio semplificato.")
+    description="Il metodo distrugge il cookie che contiene il token jwt. In un sistema più articolato avremmo previsto anche una blacklist. Ma va fuori dagli scopi del project work e quindi teniamo questo approccio semplificato.",
+    responses={
+        401: {
+            "description": "Errore di autenticazione - Utente non autenticato",
+            "content": {
+                "application/json": {
+                    "example": {"success": False, "message": "Invalid authentication token"}
+                }
+            }
+        }
+    })
 async def logout(request: Request, response: Response, auth_service: AuthServiceMeta = Depends(AuthService)):
     return success_response(auth_service.logout(request, response))
